@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search | Local Greetings</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="auth-actions" aria-label="Authentication">
+  </div>
+
+  <a class="brand" href="index.html" aria-label="Local Greetings">
+    <span class="brand-mark">LG</span>
+    <span>
+        <strong>Local Greetings</strong>
+        <small>sports in Iasi</small>
+      </span>
+  </a>
+
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span class="sr-only">Menu</span>
+  </button>
+
+  <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+    <a href="index.html">Events</a>
+    <a class="active" href="search.html">Search</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="profile.html" class="profile-link" aria-label="Profile">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2.1-7 5v1h14v-1c0-2.9-3-5-7-5Z"></path>
+      </svg>
+      Profile
+    </a>
+  </nav>
+</header>
+
+<main>
+  <section class="search-header">
+    <div>
+      <p class="eyebrow">Search</p>
+      <h1>Search for venues, courts, and events near them.</h1>
+    </div>
+    <form class="search-box" action="#" method="get">
+      <label class="sr-only" for="search-query">Search location</label>
+      <input id="search-query" type="search" placeholder="Ex: Copou, Palas, football, basketball">
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+  </section>
+
+  <section class="map-layout" aria-label="Map search">
+    <div class="map-panel">
+      <div class="map-toolbar">
+        <div class="filter-chips" aria-label="Quick filters">
+          <button class="chip active" type="button">All</button>
+          <button class="chip" type="button">Football</button>
+          <button class="chip" type="button">Basketball</button>
+          <button class="chip" type="button">Tennis</button>
+        </div>
+        <button class="icon-button" type="button" aria-label="My location">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4Zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1A9 9 0 0 0 11 20.9V23h2v-2.1A9 9 0 0 0 20.9 13H23v-2ZM12 19a7 7 0 1 1 7-7 7 7 0 0 1-7 7Z"></path></svg>
+        </button>
+      </div>
+
+      <div class="map-canvas" role="img" aria-label="Design map for gyms and courts in Iasi">
+        <span class="map-road road-one"></span>
+        <span class="map-road road-two"></span>
+        <span class="map-road road-three"></span>
+        <span class="map-area area-one">Copou</span>
+        <span class="map-area area-two">Palas</span>
+        <span class="map-area area-three">Ciric</span>
+        <span class="pin pin-primary" style="--x: 38%; --y: 32%;"><span>3</span></span>
+        <span class="pin pin-secondary" style="--x: 68%; --y: 50%;"><span>5</span></span>
+        <span class="pin pin-accent" style="--x: 53%; --y: 72%;"><span>2</span></span>
+      </div>
+    </div>
+
+    <aside class="results-panel" aria-label="Results near map">
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Nearby</p>
+          <h2>Venues and events</h2>
+        </div>
+      </div>
+
+      <article class="venue-item">
+        <div>
+          <h3>Copou Arena</h3>
+          <p>3 active events</p>
+        </div>
+        <span>1.2 km</span>
+      </article>
+      <article class="venue-item">
+        <div>
+          <h3>Palas Sport Court</h3>
+          <p>5 active events</p>
+        </div>
+        <span>2.4 km</span>
+      </article>
+      <article class="venue-item">
+        <div>
+          <h3>Ciric Base</h3>
+          <p>2 active events</p>
+        </div>
+        <span>4.8 km</span>
+      </article>
+    </aside>
+  </section>
+
+  <section class="advanced-search">
+    <details open>
+      <summary>Advanced search</summary>
+      <form class="advanced-grid" action="#" method="get">
+        <label>
+          Sport
+          <select>
+            <option>Any sport</option>
+            <option>Football</option>
+            <option>Basketball</option>
+            <option>Tennis</option>
+            <option>Volleyball</option>
+          </select>
+        </label>
+        <label>
+          Area
+          <select>
+            <option>All of Iasi</option>
+            <option>Copou</option>
+            <option>Palas</option>
+            <option>Tatarasi</option>
+            <option>Ciric</option>
+          </select>
+        </label>
+        <label>
+          Date
+          <input type="date">
+        </label>
+        <label>
+          Level
+          <select>
+            <option>Any level</option>
+            <option>Beginner</option>
+            <option>Medium</option>
+            <option>Advanced</option>
+          </select>
+        </label>
+        <label>
+          Available spots
+          <input type="number" min="1" placeholder="Minimum">
+        </label>
+        <label class="checkbox-field">
+          <input type="checkbox">
+          Only events with open registration
+        </label>
+        <button class="btn btn-primary" type="submit">Apply filters</button>
+      </form>
+    </details>
+  </section>
+</main>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

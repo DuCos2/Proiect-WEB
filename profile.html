@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | Local Greetings</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="auth-actions" aria-label="Authentication">
+  </div>
+
+  <a class="brand" href="index.html" aria-label="Local Greetings">
+    <span class="brand-mark">LG</span>
+    <span>
+        <strong>Local Greetings</strong>
+        <small>sports in Iasi</small>
+      </span>
+  </a>
+
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span class="sr-only">Menu</span>
+  </button>
+
+  <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+    <a href="index.html">Events</a>
+    <a href="search.html">Search</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a class="active profile-link" href="profile.html" aria-label="Profile">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2.1-7 5v1h14v-1c0-2.9-3-5-7-5Z"></path>
+      </svg>
+      Profile
+    </a>
+  </nav>
+</header>
+
+<main>
+  <section class="profile-shell">
+    <div class="profile-summary">
+      <div class="avatar-large" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2.1-7 5v1h14v-1c0-2.9-3-5-7-5Z"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="eyebrow">Profile</p>
+        <h1>User Profile</h1>
+        <p>Your account, participation history, and sports preferences appear here.</p>
+      </div>
+    </div>
+
+    <div class="profile-stats" aria-label="Profile statistics">
+      <div>
+        <strong>12</strong>
+        <span>participations</span>
+      </div>
+      <div>
+        <strong>4</strong>
+        <span>sports</span>
+      </div>
+      <div>
+        <strong>3</strong>
+        <span>created events</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="profile-grid">
+    <article class="profile-panel">
+      <h2>Preferences</h2>
+      <ul class="clean-list">
+        <li><span>Favorite sport</span><strong>Football</strong></li>
+        <li><span>Favorite area</span><strong>Copou</strong></li>
+        <li><span>Level</span><strong>Medium</strong></li>
+      </ul>
+    </article>
+
+    <article class="profile-panel">
+      <h2>Upcoming events</h2>
+      <ul class="clean-list">
+        <li><span>5 vs 5 Match</span><strong>Today</strong></li>
+        <li><span>Basketball free play</span><strong>Tomorrow</strong></li>
+        <li><span>Tennis doubles</span><strong>Saturday</strong></li>
+      </ul>
+    </article>
+  </section>
+</main>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
