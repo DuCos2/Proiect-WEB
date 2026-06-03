@@ -9,6 +9,8 @@ CREATE TABLE `users` (
   `username` varchar(255),
   `email` varchar(255) UNIQUE,
   `password_hash` varchar(255),
+  `role` varchar(255) DEFAULT 'user',
+  `is_banned` boolean DEFAULT false,
   `created_at` timestamp
 );
 
@@ -48,6 +50,7 @@ CREATE TABLE `events` (
   `title` varchar(255),
   `description` text,
   `event_date` datetime,
+  `end_date` datetime,
   `max_participants` int,
   `min_past_participations` int,
   `skill_level` varchar(255),
