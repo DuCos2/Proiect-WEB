@@ -36,7 +36,8 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -52,7 +53,7 @@ svg {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 1rem;
   padding: 0.85rem clamp(1rem, 4vw, 3rem);
@@ -61,29 +62,20 @@ svg {
   backdrop-filter: blur(14px);
 }
 
-.auth-actions {
-  display: flex;
-  justify-content: flex-start;
-  gap: 0.65rem;
-}
-
 .brand {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.7rem;
   min-width: 0;
 }
 
-.brand-mark {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  color: #fff;
-  background: var(--primary);
-  border-radius: 8px;
-  font-weight: 800;
+.brand-logo {
+  display: block;
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 
 .brand strong,
@@ -99,6 +91,7 @@ svg {
 
 .main-nav {
   display: flex;
+  justify-self: end;
   justify-content: flex-end;
   align-items: center;
   gap: 0.45rem;
@@ -308,7 +301,8 @@ main {
 
 .section-band,
 .advanced-search,
-.profile-grid {
+.profile-grid,
+.detail-grid {
   padding: clamp(2rem, 5vw, 4rem) 0;
 }
 
@@ -341,7 +335,9 @@ main {
 .event-card,
 .profile-panel,
 .venue-item,
-.auth-panel {
+.auth-panel,
+.detail-panel,
+.signup-card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -800,6 +796,23 @@ main {
   padding: 1.25rem;
 }
 
+.auth-back {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0.55rem 0.85rem;
+  color: #fff;
+  background: #167f7a;
+  border: 1px solid #0f5f5b;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(22, 127, 122, 0.18);
+  font-weight: 900;
+}
+
 .auth-panel h1 {
   margin: 0.5rem 0 0;
 }
@@ -818,18 +831,131 @@ main {
   justify-content: flex-start;
 }
 
+.event-detail-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: clamp(1.25rem, 4vw, 2.5rem);
+  align-items: start;
+  padding: clamp(2.5rem, 7vw, 5rem) 0 1rem;
+}
+
+.detail-copy {
+  min-width: 0;
+}
+
+.detail-copy h1 {
+  max-width: 760px;
+  margin: 0.8rem 0 1rem;
+  font-size: 4rem;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.detail-copy p:not(.eyebrow) {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 1.08rem;
+}
+
+.detail-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.detail-stats div {
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.detail-stats span,
+.signup-card p,
+.form-message {
+  color: var(--muted);
+}
+
+.detail-stats span {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.detail-stats strong {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1.25rem;
+}
+
+.signup-card {
+  padding: 1.25rem;
+}
+
+.signup-card h2,
+.detail-panel h2 {
+  margin: 0.8rem 0 0.35rem;
+  font-size: 1.45rem;
+  letter-spacing: 0;
+}
+
+.signup-form {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.signup-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.signup-form input,
+.signup-form textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.6rem 0.75rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.signup-form textarea {
+  resize: vertical;
+}
+
+.form-message {
+  display: none;
+  margin: 0;
+  font-weight: 800;
+}
+
+.form-message.visible {
+  display: block;
+  color: var(--primary-dark);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.detail-panel {
+  padding: 1.25rem;
+  box-shadow: 0 10px 30px rgba(29, 49, 47, 0.08);
+}
+
 @media (max-width: 920px) {
   .site-header {
     grid-template-columns: 1fr auto;
   }
 
   .brand {
-    justify-content: flex-start;
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .auth-actions {
     grid-column: 1;
     grid-row: 1;
   }
@@ -837,7 +963,7 @@ main {
   .nav-toggle {
     display: block;
     grid-column: 2;
-    grid-row: 1 / span 2;
+    grid-row: 1;
   }
 
   .main-nav {
@@ -856,7 +982,8 @@ main {
   .hero-section,
   .search-header,
   .map-layout,
-  .profile-shell {
+  .profile-shell,
+  .event-detail-hero {
     grid-template-columns: 1fr;
   }
 
@@ -866,7 +993,8 @@ main {
 
   .hero-copy h1,
   .search-header h1,
-  .profile-summary h1 {
+  .profile-summary h1,
+  .detail-copy h1 {
     font-size: 3.4rem;
   }
 
@@ -879,7 +1007,8 @@ main {
   .event-grid,
   .info-strip,
   .advanced-grid,
-  .profile-grid {
+  .profile-grid,
+  .detail-grid {
     grid-template-columns: 1fr;
   }
 
@@ -901,8 +1030,13 @@ main {
     padding: 0.75rem;
   }
 
-  .auth-actions {
-    gap: 0.4rem;
+  .brand {
+    gap: 0.55rem;
+  }
+
+  .brand-logo {
+    width: 44px;
+    height: 44px;
   }
 
   .btn {
@@ -915,8 +1049,13 @@ main {
 
   .hero-copy h1,
   .search-header h1,
-  .profile-summary h1 {
+  .profile-summary h1,
+  .detail-copy h1 {
     font-size: 2.25rem;
+  }
+
+  .detail-stats {
+    grid-template-columns: 1fr;
   }
 
   .search-box {

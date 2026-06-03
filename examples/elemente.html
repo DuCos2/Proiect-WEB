@@ -1,14 +1,11 @@
-<!DOCTYPE html> <!--(versiunea limbajului HTML, adica 5) -->
-<html lang="ro"> <!-- radacina documentului cu atributul lang care poate ajuta instrumentele de traducere, sintetizare a vorbirii, etc-->
-<head> <!-- elementul  nu va fi afisat de catre browser; poate sa lipseasca daca nu contine nimic -->
-    <title>Elemente HTML</title> <!-- titlul va apare in pagina de cautare a browserului, utilizata de motoare de cautare cand afiseaza link-ul catre pagina; trebuie sa apara obligatoriu -->
-    <meta charset="UTF-8"> <!-- elemente meta (pot sa apara doar in continutul elementului <head> --> 
-    <meta name="author" content= "Oana Captarencu">    
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <title>Elemente HTML</title>
+    <meta charset="UTF-8">
+    <meta name="author" content= "Oana Captarencu">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <meta name="description" content="This describes the content of the page appears here" > <!-- apare de obicei cand pagina e gasita de motoare de cautare (Google de ex)-->
-    <!-- <meta http-equiv="refresh" content="10">  indica browser-ulu sa faca refresh paginii dupa 10 secunde ; utilizare descurajata de catre W3c-->
-    <!-- <meta http-equiv="refresh" content="20; url=https://new.com/">  dupa 10 secunde se face redirect-- http-equiv inseamna ca e o alternativa la un header http -->
-   
+    <meta name="description" content="This describes the content of the page appears here" >
     <style>
         body {
             font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -16,7 +13,7 @@
             margin: 0 auto;
         }
         textarea::placeholder {
-           color: #888; /* Make sure the color contrasts with the background */
+           color: #888;
         }
       
         code {
@@ -30,12 +27,8 @@
     </style>
     <link rel="stylesheet" href="style.css"  media="screen and (max-width: 600px)">
     <script src = "functions.js"></script>
-    <script>
-        //cod javascript; poate sa apara si in alte parti
-        //alert("Bau!");  
-    </script>
 </head>
-<body> <!-- elementul body: continutul va fi afisat de catre browser; exista un singur element body -->
+<body>
    <h1 style = "color:rgb(77, 77, 204)">Elemente HTML </h1>
    <h2 class="subtitle">Elemente pentru organizarea continutului </h2>
    <p>Elemente semantice: </p>
