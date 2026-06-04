@@ -939,6 +939,20 @@ main {
   color: var(--primary-dark);
 }
 
+.form-message.error {
+  color: #b42318;
+}
+
+.auth-panel input[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

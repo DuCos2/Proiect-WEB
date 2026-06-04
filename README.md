@@ -15,4 +15,16 @@ Acesta este un proiect pentru disciplina Web.
 - `docs/` - documente si PDF-uri
 - `examples/` - exemple HTML pastrate separat de aplicatia principala
 
-Pentru rulare in WebStorm, deschide `index.html` si foloseste `Open in Browser`.
+## Rulare locala
+
+Pentru autentificare este nevoie de PHP si MySQL prin XAMPP:
+
+1. Porneste Apache si MySQL din XAMPP.
+2. Importa `backend/Database/Web_LoG.sql` in baza de date `log_iasi`.
+3. Deschide aplicatia prin symlink-ul din XAMPP:
+
+```text
+http://localhost/Proiect-WEB/
+```
+
+Paginile HTML nu trebuie deschise direct din filesystem pentru login/register, deoarece formularele folosesc servicii PHP prin `fetch`.

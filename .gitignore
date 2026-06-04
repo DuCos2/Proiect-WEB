@@ -1,2 +1,5 @@
 .idea/
 .DS_Store
+php-server*.log
+backend/storage/sessions/sess_*
+backend/storage/mail.log

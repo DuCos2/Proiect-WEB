@@ -9,7 +9,7 @@
 <body>
 <main class="auth-page">
   <a class="auth-back" href="index.html" aria-label="Back to home">&larr; Home</a>
-  <form class="auth-panel" action="#" method="post">
+  <form class="auth-panel" action="#" method="post" data-auth-form data-auth-endpoint="backend/public/login.php" data-auth-redirect="profile.html">
     <a class="brand auth-brand" href="index.html">
       <img class="brand-logo" src="assets/images/app-logo.png" alt="">
       <span>
@@ -19,14 +19,16 @@
     </a>
     <h1>Login</h1>
     <label>Email
-      <input type="email" placeholder="email@example.com">
+      <input type="email" name="email" autocomplete="email" placeholder="email@example.com" required>
     </label>
     <label>Password
-      <input type="password" placeholder="Password">
+      <input type="password" name="password" autocomplete="current-password" placeholder="Password" required>
     </label>
+    <p class="form-message" data-auth-message role="status" aria-live="polite"></p>
     <button class="btn btn-primary" type="submit">Sign In</button>
     <p>Don't have an account? <a href="register.html">Register</a></p>
   </form>
 </main>
+<script src="assets/js/main.js"></script>
 </body>
 </html>

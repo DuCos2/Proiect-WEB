@@ -23,6 +23,158 @@ document.querySelectorAll(".filter-chips").forEach((chipGroup) => {
   });
 });
 
+const authState = {
+  csrfToken: null,
+  user: null,
+  loaded: false
+};
+
+const apiRequest = async (url, options = {}) => {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    ...options,
+    headers: {
+      Accept: "application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  let payload = {};
+
+  try {
+    payload = await response.json();
+  } catch (error) {
+    payload = { message: "Unexpected server response." };
+  }
+
+  if (!response.ok) {
+    const requestError = new Error(payload.message || "Request failed.");
+    requestError.payload = payload;
+    throw requestError;
+  }
+
+  return payload;
+};
+
+const getCsrfToken = async () => {
+  if (authState.csrfToken) {
+    return authState.csrfToken;
+  }
+
+  const payload = await apiRequest("backend/public/csrf.php");
+  authState.csrfToken = payload.token;
+
+  return authState.csrfToken;
+};
+
+const setFormMessage = (form, message, type = "success") => {
+  const messageElement = form.querySelector("[data-auth-message]");
+
+  if (!messageElement) {
+    return;
+  }
+
+  messageElement.textContent = message;
+  messageElement.classList.add("visible");
+  messageElement.classList.toggle("error", type === "error");
+};
+
+const setFormErrors = (form, errors = {}) => {
+  form.querySelectorAll("[name]").forEach((field) => {
+    const error = errors[field.name];
+
+    field.removeAttribute("aria-invalid");
+    field.removeAttribute("title");
+
+    if (error) {
+      field.setAttribute("aria-invalid", "true");
+      field.setAttribute("title", error);
+    }
+  });
+};
+
+document.querySelectorAll("[data-auth-form]").forEach((form) => {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const submitButton = form.querySelector("[type='submit']");
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+
+    setFormErrors(form);
+    setFormMessage(form, "Checking your details...");
+
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
+
+    try {
+      const csrfToken = await getCsrfToken();
+      const result = await apiRequest(form.dataset.authEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify(payload)
+      });
+
+      authState.user = result.user || null;
+      setFormMessage(form, result.message || "Done.");
+
+      if (form.dataset.authRedirect) {
+        window.location.assign(form.dataset.authRedirect);
+      }
+    } catch (error) {
+      const errorPayload = error.payload || {};
+      setFormErrors(form, errorPayload.errors);
+      setFormMessage(form, errorPayload.message || error.message, "error");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
+  });
+});
+
+const loadCurrentUser = async () => {
+  if (authState.loaded) {
+    return authState.user;
+  }
+
+  authState.loaded = true;
+
+  try {
+    const payload = await apiRequest("backend/public/me.php");
+    authState.user = payload.authenticated ? payload.user : null;
+  } catch (error) {
+    authState.user = null;
+  }
+
+  return authState.user;
+};
+
+const profileName = document.querySelector("[data-profile-name]");
+const profileEmail = document.querySelector("[data-profile-email]");
+
+if (profileName || document.body.dataset.requiresAuth !== undefined) {
+  loadCurrentUser().then((user) => {
+    if (!user && document.body.dataset.requiresAuth !== undefined) {
+      window.location.assign("login.html");
+      return;
+    }
+
+    if (user && profileName) {
+      profileName.textContent = user.username;
+      document.title = `${user.username} | Local Greetings`;
+    }
+
+    if (user && profileEmail) {
+      profileEmail.textContent = user.email;
+    }
+  });
+}
+
 const eventDetails = {
   "copou-football": {
     title: "Quick match in Copou",
@@ -116,9 +268,18 @@ if (detailRoot) {
     const planList = document.querySelector("#detail-plan");
 
     if (planList) {
-      planList.innerHTML = eventItem.plan
-        .map(([time, label]) => `<li><span>${time}</span><strong>${label}</strong></li>`)
-        .join("");
+      planList.replaceChildren();
+
+      eventItem.plan.forEach(([time, label]) => {
+        const item = document.createElement("li");
+        const timeElement = document.createElement("span");
+        const labelElement = document.createElement("strong");
+
+        timeElement.textContent = time;
+        labelElement.textContent = label;
+        item.append(timeElement, labelElement);
+        planList.append(item);
+      });
     }
   } else {
     setText("#detail-title", "Event not found");

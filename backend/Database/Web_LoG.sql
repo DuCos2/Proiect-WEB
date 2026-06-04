@@ -6,12 +6,30 @@ CREATE TABLE `cities` (
 
 CREATE TABLE `users` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
-  `username` varchar(255),
-  `email` varchar(255) UNIQUE,
-  `password_hash` varchar(255),
-  `role` varchar(255) DEFAULT 'user',
-  `is_banned` boolean DEFAULT false,
-  `created_at` timestamp
+  `username` varchar(80) NOT NULL,
+  `email` varchar(255) NOT NULL UNIQUE,
+  `password_hash` varchar(255) NOT NULL,
+  `role` enum('user', 'moderator', 'admin') NOT NULL DEFAULT 'user',
+  `is_banned` boolean NOT NULL DEFAULT false,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE `email_verifications` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token_hash` varchar(64) NOT NULL UNIQUE,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE `password_resets` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token_hash` varchar(64) NOT NULL UNIQUE,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE `sports` (
@@ -102,3 +120,7 @@ ALTER TABLE `event_participants` ADD FOREIGN KEY (`user_id`) REFERENCES `users` 
 ALTER TABLE `event_comments` ADD FOREIGN KEY (`event_id`) REFERENCES `events` (`id`);
 
 ALTER TABLE `event_comments` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+ALTER TABLE `email_verifications` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `password_resets` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;

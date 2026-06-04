@@ -6,7 +6,7 @@
   <title>Profile | Local Greetings</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body>
+<body data-requires-auth>
 <header class="site-header">
   <a class="brand" href="index.html" aria-label="Local Greetings">
     <img class="brand-logo" src="assets/images/app-logo.png" alt="">
@@ -47,8 +47,8 @@
       </div>
       <div>
         <p class="eyebrow">Profile</p>
-        <h1>User Profile</h1>
-        <p>Your account, participation history, and sports preferences appear here.</p>
+        <h1 data-profile-name>User Profile</h1>
+        <p data-profile-email>Your account, participation history, and sports preferences appear here.</p>
       </div>
     </div>
 
