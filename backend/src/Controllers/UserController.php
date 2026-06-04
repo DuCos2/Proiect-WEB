@@ -31,28 +31,54 @@ final class UserController
         $errors = $this->validateRegistration($username, $email, $password);
 
         if ($errors !== []) {
-            Response::json(['message' => 'Please correct the highlighted fields.', 'errors' => $errors], 422);
+            Response::json([
+                'message' => 'Please correct the highlighted fields.',
+                'errors' => $errors
+            ], 422);
         }
 
         $users = $this->requireUsers();
 
         if ($users->findByEmail($email) !== null) {
-            Response::json(['message' => 'Please correct the highlighted fields.', 'errors' => ['email' => 'This email is already registered.']], 409);
+            Response::json([
+                'message' => 'Please correct the highlighted fields.',
+                'errors' => [
+                    'email' => 'This email is already registered.'
+                ]
+            ], 409);
         }
 
         try {
-            $user = $users->create($username, $email, password_hash($password, PASSWORD_DEFAULT));
+            $user = $users->create(
+                $username,
+                $email,
+                password_hash($password, PASSWORD_DEFAULT)
+            );
         } catch (PDOException $exception) {
             if ($exception->getCode() === '23000') {
-                Response::json(['message' => 'Please correct the highlighted fields.', 'errors' => ['email' => 'This email is already registered.']], 409);
+                Response::json([
+                    'message' => 'Please correct the highlighted fields.',
+                    'errors' => [
+                        'email' => 'This email is already registered.'
+                    ]
+                ], 409);
             }
 
-            Response::json(['message' => 'Account could not be created right now.'], 500);
+            Response::json([
+                'message' => 'Account could not be created right now.'
+            ], 500);
         }
 
-        $this->sendVerificationEmail($user);
-        Session::login($user);
-        Response::json(['message' => 'Account created. Check your email to verify the account.', 'user' => $this->publicUser($user)], 201);
+        try {
+            $this->sendVerificationEmail($user);
+            $message = 'Account created. Check your email to verify the account.';
+        } catch (\Throwable $exception) {
+            $message = 'Account created.';
+        }
+
+        Response::json([
+            'message' => $message,
+        ], 201);
     }
 
     public function login(array $payload): void
@@ -80,6 +106,15 @@ final class UserController
 
         if ((bool) $user['is_banned']) {
             Response::json(['message' => 'This account is disabled.'], 403);
+        }
+
+        if ($user['email_verified_at'] === null) {
+            try {
+                $this->sendVerificationEmail($user);
+            } catch (\Throwable $exception) {
+            }
+
+            Response::json(['message' => 'Please verify your email before logging in. A new verification link was sent.'], 403);
         }
 
         if (password_needs_rehash($user['password_hash'], PASSWORD_DEFAULT)) {

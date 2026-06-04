@@ -97,18 +97,28 @@ svg {
   gap: 0.45rem;
 }
 
-.main-nav a {
+.main-nav a,
+.main-nav button {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   padding: 0.55rem 0.75rem;
+  border: 0;
+  background: transparent;
   color: var(--muted);
+  cursor: pointer;
+  font: inherit;
   border-radius: 8px;
   font-weight: 700;
 }
 
+.main-nav [hidden] {
+  display: none;
+}
+
 .main-nav a:hover,
-.main-nav a.active {
+.main-nav a.active,
+.main-nav button:hover {
   color: var(--ink);
   background: var(--surface-soft);
 }

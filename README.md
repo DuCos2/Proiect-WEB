@@ -28,3 +28,17 @@ http://localhost/Proiect-WEB/
 ```
 
 Paginile HTML nu trebuie deschise direct din filesystem pentru login/register, deoarece formularele folosesc servicii PHP prin `fetch`.
+
+## Email local si SMTP
+
+Emailurile pentru verificare cont si resetare parola sunt salvate local in:
+
+```text
+backend/storage/mail.log
+```
+
+Pentru trimitere reala prin Gmail SMTP:
+
+1. Copiaza `backend/config/mail.example.php` in `backend/config/mail.local.php`.
+2. Completeaza adresa Gmail si un Google App Password.
+3. Nu urca `mail.local.php` pe GitHub; este ignorat prin `.gitignore`.

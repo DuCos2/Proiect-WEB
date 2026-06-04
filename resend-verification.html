@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register | Local Greetings</title>
+  <title>Resend Verification | Local Greetings</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
 <main class="auth-page">
-  <a class="auth-back" href="index.html" aria-label="Back to home">&larr; Home</a>
+  <a class="auth-back" href="login.html" aria-label="Back to login">&larr; Login</a>
 
-  <form class="auth-panel" action="#" method="post" data-auth-form data-auth-endpoint="backend/public/register.php" data-auth-redirect="login.html">
+  <form class="auth-panel" action="#" method="post" data-auth-form data-auth-endpoint="backend/public/resend-verification.php">
     <a class="brand auth-brand" href="index.html">
       <img class="brand-logo" src="assets/images/app-logo.png" alt="">
       <span>
@@ -19,25 +19,17 @@
       </span>
     </a>
 
-    <h1>Register</h1>
-
-    <label>Name
-      <input type="text" name="username" autocomplete="name" placeholder="Your name" required minlength="2" maxlength="80">
-    </label>
+    <h1>Verify account</h1>
 
     <label>Email
       <input type="email" name="email" autocomplete="email" placeholder="email@example.com" required>
     </label>
 
-    <label>Password
-      <input type="password" name="password" autocomplete="new-password" placeholder="Password" required minlength="8" maxlength="255">
-    </label>
-
     <p class="form-message" data-auth-message role="status" aria-live="polite"></p>
 
-    <button class="btn btn-primary" type="submit">Create account</button>
+    <button class="btn btn-primary" type="submit">Send verification link</button>
 
-    <p>Already have an account? <a href="login.html">Login</a></p>
+    <p>Already verified? <a href="login.html">Login</a></p>
   </form>
 </main>
 

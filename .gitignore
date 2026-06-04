@@ -3,3 +3,4 @@
 php-server*.log
 backend/storage/sessions/sess_*
 backend/storage/mail.log
+backend/config/mail.local.php

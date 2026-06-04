@@ -19,6 +19,7 @@ document.querySelectorAll(".filter-chips").forEach((chipGroup) => {
     chipGroup.querySelectorAll(".chip").forEach((item) => {
       item.classList.remove("active");
     });
+
     chip.classList.add("active");
   });
 });
@@ -26,7 +27,8 @@ document.querySelectorAll(".filter-chips").forEach((chipGroup) => {
 const authState = {
   csrfToken: null,
   user: null,
-  loaded: false
+  loaded: false,
+  loading: null
 };
 
 const apiRequest = async (url, options = {}) => {
@@ -93,6 +95,89 @@ const setFormErrors = (form, errors = {}) => {
   });
 };
 
+document.querySelectorAll("[data-token-from-url]").forEach((field) => {
+  const params = new URLSearchParams(window.location.search);
+  const tokenName = field.dataset.tokenFromUrl || "token";
+
+  field.value = params.get(tokenName) || "";
+});
+
+const createLogoutButton = () => {
+  const button = document.createElement("button");
+
+  button.className = "nav-logout";
+  button.type = "button";
+  button.textContent = "Logout";
+
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+
+    try {
+      const csrfToken = await getCsrfToken();
+
+      await apiRequest("backend/public/logout.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify({})
+      });
+
+      authState.csrfToken = null;
+      authState.user = null;
+      authState.loaded = true;
+      window.location.assign("index.html");
+    } catch (error) {
+      button.disabled = false;
+    }
+  });
+
+  return button;
+};
+
+const updateAuthNavigation = async () => {
+  if (!mainNav) {
+    return;
+  }
+
+  const user = await loadCurrentUser();
+  const loginLink = mainNav.querySelector('a[href="login.html"]');
+  const registerLink = mainNav.querySelector('a[href="register.html"]');
+  const profileLink = mainNav.querySelector('a[href="profile.html"]');
+  let logoutButton = mainNav.querySelector(".nav-logout");
+
+  if (user) {
+    if (loginLink) {
+      loginLink.hidden = true;
+    }
+
+    if (registerLink) {
+      registerLink.hidden = true;
+    }
+
+    if (!logoutButton) {
+      logoutButton = createLogoutButton();
+      mainNav.insertBefore(logoutButton, profileLink);
+    }
+
+    logoutButton.hidden = false;
+    return;
+  }
+
+  if (loginLink) {
+    loginLink.hidden = false;
+  }
+
+  if (registerLink) {
+    registerLink.hidden = false;
+  }
+
+  if (logoutButton) {
+    logoutButton.hidden = true;
+  }
+};
+
 document.querySelectorAll("[data-auth-form]").forEach((form) => {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -110,6 +195,7 @@ document.querySelectorAll("[data-auth-form]").forEach((form) => {
 
     try {
       const csrfToken = await getCsrfToken();
+
       const result = await apiRequest(form.dataset.authEndpoint, {
         method: "POST",
         headers: {
@@ -127,6 +213,7 @@ document.querySelectorAll("[data-auth-form]").forEach((form) => {
       }
     } catch (error) {
       const errorPayload = error.payload || {};
+
       setFormErrors(form, errorPayload.errors);
       setFormMessage(form, errorPayload.message || error.message, "error");
     } finally {
@@ -137,43 +224,69 @@ document.querySelectorAll("[data-auth-form]").forEach((form) => {
   });
 });
 
+document.querySelectorAll("[data-auth-auto-submit]").forEach((form) => {
+  if (typeof form.requestSubmit === "function") {
+    form.requestSubmit();
+    return;
+  }
+
+  form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+});
+
 const loadCurrentUser = async () => {
   if (authState.loaded) {
     return authState.user;
   }
 
-  authState.loaded = true;
-
-  try {
-    const payload = await apiRequest("backend/public/me.php");
-    authState.user = payload.authenticated ? payload.user : null;
-  } catch (error) {
-    authState.user = null;
+  if (authState.loading) {
+    return authState.loading;
   }
 
-  return authState.user;
+  authState.loading = (async () => {
+    try {
+      const payload = await apiRequest("backend/public/me.php");
+      authState.user = payload.authenticated ? payload.user : null;
+    } catch (error) {
+      authState.user = null;
+    } finally {
+      authState.loaded = true;
+      authState.loading = null;
+    }
+
+    return authState.user;
+  })();
+
+  return authState.loading;
 };
 
-const profileName = document.querySelector("[data-profile-name]");
-const profileEmail = document.querySelector("[data-profile-email]");
+const updateProfilePage = async () => {
+  const profileName = document.querySelector("[data-profile-name]");
+  const profileEmail = document.querySelector("[data-profile-email]");
+  const requiresAuth = document.body.dataset.requiresAuth !== undefined;
 
-if (profileName || document.body.dataset.requiresAuth !== undefined) {
-  loadCurrentUser().then((user) => {
-    if (!user && document.body.dataset.requiresAuth !== undefined) {
-      window.location.assign("login.html");
-      return;
-    }
+  if (!profileName && !requiresAuth) {
+    return;
+  }
 
-    if (user && profileName) {
-      profileName.textContent = user.username;
-      document.title = `${user.username} | Local Greetings`;
-    }
+  const user = await loadCurrentUser();
 
-    if (user && profileEmail) {
-      profileEmail.textContent = user.email;
-    }
-  });
-}
+  if (!user && requiresAuth) {
+    window.location.assign("login.html");
+    return;
+  }
+
+  if (user && profileName) {
+    profileName.textContent = user.username;
+    document.title = `${user.username} | Local Greetings`;
+  }
+
+  if (user && profileEmail) {
+    profileEmail.textContent = user.email;
+  }
+};
+
+updateProfilePage();
+updateAuthNavigation();
 
 const eventDetails = {
   "copou-football": {
@@ -252,6 +365,7 @@ if (detailRoot) {
 
   if (eventItem) {
     document.title = `${eventItem.title} | Local Greetings`;
+
     setText("#detail-sport", eventItem.sport);
     setText("#detail-title", eventItem.title);
     setText("#detail-description", eventItem.description);
@@ -277,6 +391,7 @@ if (detailRoot) {
 
         timeElement.textContent = time;
         labelElement.textContent = label;
+
         item.append(timeElement, labelElement);
         planList.append(item);
       });
@@ -307,6 +422,7 @@ if (detailRoot) {
 
       localStorage.setItem("eventRegistrations", JSON.stringify(registrations));
       signupForm.reset();
+
       signupMessage.textContent = "Registration sent. The organizer will contact you soon.";
       signupMessage.classList.add("visible");
     });
