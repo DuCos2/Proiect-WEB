@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use App\Support\Auth;
 use App\Support\Csrf;
 use App\Support\Mailer;
 use App\Support\Request;
@@ -121,20 +122,29 @@ final class UserController
             $users->updatePasswordHash((int) $user['id'], password_hash($password, PASSWORD_DEFAULT));
         }
 
+        $token = $this->newToken();
+        $users->createAuthToken((int) $user['id'], Auth::tokenHash($token));
+
         $this->clearFailedLogins($email);
         Session::login($user);
-        Response::json(['message' => 'Logged in.', 'user' => $this->publicUser($user)]);
+        Response::json(['message' => 'Logged in.', 'user' => $this->publicUser($user), 'token' => $token]);
     }
 
     public function me(): void
     {
-        $user = Session::user();
+        $user = Auth::user($this->users);
         Response::json(['authenticated' => $user !== null, 'user' => $user]);
     }
 
     public function logout(): void
     {
         $this->verifyCsrf();
+        $token = Request::bearerToken();
+
+        if ($token !== null && $this->users instanceof User) {
+            $this->users->revokeAuthToken(Auth::tokenHash($token));
+        }
+
         Session::logout();
         Response::json(['message' => 'Logged out.']);
     }
@@ -258,8 +268,6 @@ final class UserController
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $this->textLength($email) > 255) {
             $errors['email'] = 'Enter a valid email address.';
-        } elseif (!$this->emailDomainAcceptsMail($email)) {
-            $errors['email'] = 'Use an email domain that can receive mail.';
         }
 
         if (strlen($password) < 8 || strlen($password) > 255) {
@@ -367,14 +375,4 @@ final class UserController
         return hash('sha256', $token);
     }
 
-    private function emailDomainAcceptsMail(string $email): bool
-    {
-        $domain = substr(strrchr($email, '@') ?: '', 1);
-
-        if ($domain === '') {
-            return false;
-        }
-
-        return checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A') || checkdnsrr($domain, 'AAAA');
-    }
 }

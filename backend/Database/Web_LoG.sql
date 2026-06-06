@@ -32,6 +32,15 @@ CREATE TABLE `password_resets` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE `auth_tokens` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token_hash` varchar(64) NOT NULL UNIQUE,
+  `expires_at` datetime NOT NULL,
+  `revoked_at` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE `sports` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255)
@@ -41,6 +50,7 @@ CREATE TABLE `locations` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `city_id` int,
   `name` varchar(255),
+  `area` varchar(255),
   `latitude` decimal,
   `longitude` decimal,
   `address` varchar(255)
@@ -124,3 +134,5 @@ ALTER TABLE `event_comments` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id
 ALTER TABLE `email_verifications` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `password_resets` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `auth_tokens` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;

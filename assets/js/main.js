@@ -26,19 +26,26 @@ document.querySelectorAll(".filter-chips").forEach((chipGroup) => {
 
 const authState = {
   csrfToken: null,
+  token: localStorage.getItem("logAuthToken"),
   user: null,
   loaded: false,
   loading: null
 };
 
 const apiRequest = async (url, options = {}) => {
+  const headers = {
+    Accept: "application/json",
+    ...(options.headers || {})
+  };
+
+  if (authState.token) {
+    headers.Authorization = `Bearer ${authState.token}`;
+  }
+
   const response = await fetch(url, {
     credentials: "same-origin",
     ...options,
-    headers: {
-      Accept: "application/json",
-      ...(options.headers || {})
-    }
+    headers
   });
 
   let payload = {};
@@ -125,8 +132,10 @@ const createLogoutButton = () => {
       });
 
       authState.csrfToken = null;
+      authState.token = null;
       authState.user = null;
       authState.loaded = true;
+      localStorage.removeItem("logAuthToken");
       window.location.assign("index.html");
     } catch (error) {
       button.disabled = false;
@@ -206,6 +215,12 @@ document.querySelectorAll("[data-auth-form]").forEach((form) => {
       });
 
       authState.user = result.user || null;
+
+      if (result.token) {
+        authState.token = result.token;
+        localStorage.setItem("logAuthToken", result.token);
+      }
+
       setFormMessage(form, result.message || "Done.");
 
       if (form.dataset.authRedirect) {
@@ -285,8 +300,169 @@ const updateProfilePage = async () => {
   }
 };
 
+const getTopSport = (stats) => {
+  if (!stats.sportMix.length) {
+    return null;
+  }
+
+  return [...stats.sportMix].sort((first, second) => second.percent - first.percent)[0];
+};
+
+const getTopZone = (stats) => {
+  if (!stats.zones.length) {
+    return null;
+  }
+
+  return [...stats.zones].sort((first, second) => second.percent - first.percent)[0];
+};
+
+const getActivitySummary = (stats) => {
+  const topSport = getTopSport(stats);
+  const topZone = getTopZone(stats);
+
+  if (!topSport || !topZone || stats.gamesPlayed === 0) {
+    return "No completed games yet. Join an event and this section will update from your activity.";
+  }
+
+  const secondarySports = stats.sportMix
+    .filter((sport) => sport !== topSport)
+    .slice(0, 2)
+    .map((sport) => sport.label.toLowerCase())
+    .join(" and ");
+
+  const varietyText = secondarySports
+    ? `, with ${secondarySports} adding variety`
+    : "";
+
+  return `${stats.gamesPlayed} games played so far, mostly ${topSport.label.toLowerCase()} around ${topZone.label}. The usual start time is ${stats.favoriteHour}${varietyText}.`;
+};
+
+const appendListItem = (root, labelText, valueText) => {
+  const item = document.createElement("li");
+  const label = document.createElement("span");
+  const value = document.createElement("strong");
+
+  label.textContent = labelText;
+  value.textContent = valueText;
+  item.append(label, value);
+  root.append(item);
+};
+
+const renderProfileStats = (profileStats) => {
+  document.querySelectorAll("[data-profile-stat]").forEach((element) => {
+    const statName = element.dataset.profileStat;
+
+    if (Object.prototype.hasOwnProperty.call(profileStats, statName)) {
+      element.textContent = profileStats[statName];
+    }
+  });
+
+  const sportMixRoot = document.querySelector("[data-sport-mix]");
+
+  if (sportMixRoot) {
+    sportMixRoot.replaceChildren();
+
+    if (!profileStats.sportMix.length) {
+      const empty = document.createElement("p");
+      empty.className = "profile-note";
+      empty.textContent = "No sport history yet.";
+      sportMixRoot.append(empty);
+    }
+
+    profileStats.sportMix.forEach((sport) => {
+      const item = document.createElement("div");
+      const topLine = document.createElement("div");
+      const label = document.createElement("span");
+      const value = document.createElement("strong");
+      const track = document.createElement("span");
+      const bar = document.createElement("span");
+
+      item.className = "stat-bar";
+      topLine.className = "stat-bar-top";
+      track.className = "stat-bar-track";
+      bar.className = "stat-bar-fill";
+      bar.style.width = `${sport.percent}%`;
+
+      label.textContent = sport.label;
+      value.textContent = `${sport.percent}%`;
+      topLine.append(label, value);
+      track.append(bar);
+      item.append(topLine, track);
+      sportMixRoot.append(item);
+    });
+  }
+
+  const zoneStatsRoot = document.querySelector("[data-zone-stats]");
+
+  if (zoneStatsRoot) {
+    zoneStatsRoot.replaceChildren();
+
+    if (!profileStats.zones.length) {
+      appendListItem(zoneStatsRoot, "No zones yet", "0%");
+    }
+
+    profileStats.zones.forEach((zone) => {
+      const item = document.createElement("li");
+      const label = document.createElement("span");
+      const value = document.createElement("strong");
+
+      label.textContent = zone.label;
+      value.textContent = `${zone.percent}%`;
+      item.append(label, value);
+      zoneStatsRoot.append(item);
+    });
+  }
+
+  const preferencesRoot = document.querySelector("[data-preferences]");
+
+  if (preferencesRoot) {
+    preferencesRoot.replaceChildren();
+    appendListItem(preferencesRoot, "Favorite sport", profileStats.preferences.favoriteSport);
+    appendListItem(preferencesRoot, "Favorite area", profileStats.preferences.favoriteArea);
+    appendListItem(preferencesRoot, "Level", profileStats.preferences.level);
+  }
+
+  const upcomingRoot = document.querySelector("[data-upcoming-events]");
+
+  if (upcomingRoot) {
+    upcomingRoot.replaceChildren();
+
+    if (!profileStats.upcomingEvents.length) {
+      appendListItem(upcomingRoot, "No upcoming events", "");
+    }
+
+    profileStats.upcomingEvents.forEach((eventItem) => {
+      appendListItem(upcomingRoot, eventItem.title, eventItem.dateLabel);
+    });
+  }
+
+  const summary = document.querySelector("[data-profile-summary]");
+
+  if (summary) {
+    summary.textContent = getActivitySummary(profileStats);
+  }
+};
+
+const loadProfileStats = async () => {
+  if (!document.querySelector("[data-profile-stat]")) {
+    return;
+  }
+
+  try {
+    const payload = await apiRequest("backend/public/profile-stats.php");
+    renderProfileStats(payload.stats);
+  } catch (error) {
+    const summary = document.querySelector("[data-profile-summary]");
+
+    if (summary) {
+      summary.textContent = "Profile statistics could not be loaded right now.";
+    }
+  }
+};
+
 updateProfilePage();
 updateAuthNavigation();
+loadProfileStats();
 
 const eventDetails = {
   "copou-football": {

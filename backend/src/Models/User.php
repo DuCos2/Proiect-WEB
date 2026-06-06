@@ -52,6 +52,41 @@ final class User
         ]);
     }
 
+    public function createAuthToken(int $userId, string $tokenHash): void
+    {
+        $statement = $this->pdo->prepare(
+            'INSERT INTO auth_tokens (user_id, token_hash, expires_at)
+             VALUES (:user_id, :token_hash, DATE_ADD(NOW(), INTERVAL 7 DAY))'
+        );
+        $statement->execute([
+            'user_id' => $userId,
+            'token_hash' => $tokenHash,
+        ]);
+    }
+
+    public function findByAuthTokenHash(string $tokenHash): ?array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT users.id, users.username, users.email, users.password_hash, users.role, users.is_banned, users.email_verified_at
+             FROM auth_tokens
+             INNER JOIN users ON users.id = auth_tokens.user_id
+             WHERE auth_tokens.token_hash = :token_hash
+               AND auth_tokens.expires_at > NOW()
+               AND auth_tokens.revoked_at IS NULL
+             LIMIT 1'
+        );
+        $statement->execute(['token_hash' => $tokenHash]);
+        $user = $statement->fetch();
+
+        return $user ?: null;
+    }
+
+    public function revokeAuthToken(string $tokenHash): void
+    {
+        $statement = $this->pdo->prepare('UPDATE auth_tokens SET revoked_at = NOW() WHERE token_hash = :token_hash');
+        $statement->execute(['token_hash' => $tokenHash]);
+    }
+
     public function createEmailVerification(int $userId, string $tokenHash): void
     {
         $this->deleteEmailVerifications($userId);

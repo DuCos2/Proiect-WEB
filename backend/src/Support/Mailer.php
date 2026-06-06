@@ -32,6 +32,8 @@ final class Mailer
         $mail->Host = $config['host'];
         $mail->Port = (int) $config['port'];
         $mail->SMTPAuth = true;
+        $mail->Timeout = 3;
+        $mail->SMTPKeepAlive = false;
         $mail->Username = $config['username'];
         $mail->Password = $config['password'];
         $mail->SMTPSecure = $this->smtpEncryption($config['encryption']);

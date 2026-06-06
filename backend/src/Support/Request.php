@@ -30,6 +30,28 @@ final class Request
         return $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
     }
 
+    public static function bearerToken(): ?string
+    {
+        $headers = function_exists('getallheaders') ? getallheaders() : [];
+
+        foreach ($headers as $name => $value) {
+            if (strtolower((string) $name) === 'authorization') {
+                return self::parseBearerToken((string) $value);
+            }
+        }
+
+        return self::parseBearerToken($_SERVER['HTTP_AUTHORIZATION'] ?? '');
+    }
+
+    private static function parseBearerToken(string $header): ?string
+    {
+        if (preg_match('/^Bearer\s+(.+)$/i', trim($header), $matches) !== 1) {
+            return null;
+        }
+
+        return trim($matches[1]);
+    }
+
     public static function requireMethod(string $method): void
     {
         if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== strtoupper($method)) {

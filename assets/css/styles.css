@@ -709,7 +709,7 @@ main {
 
 .profile-shell {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, auto);
   gap: 1.5rem;
   align-items: center;
   margin-top: clamp(2rem, 6vw, 4rem);
@@ -764,7 +764,7 @@ main {
 
 .profile-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: 1rem;
 }
 
@@ -791,6 +791,56 @@ main {
 
 .clean-list span {
   color: var(--muted);
+}
+
+.stat-bars {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.stat-bar {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.stat-bar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.stat-bar-top strong {
+  color: var(--ink);
+}
+
+.stat-bar-track {
+  display: block;
+  height: 10px;
+  overflow: hidden;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.stat-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  border-radius: inherit;
+}
+
+.zone-list strong {
+  color: var(--primary-dark);
+}
+
+.profile-note {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .auth-page {
@@ -1041,7 +1091,7 @@ main {
   }
 
   .profile-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
 }
 
