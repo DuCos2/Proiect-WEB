@@ -672,6 +672,58 @@ const initializeCreateEventForm = async () => {
     dateInput.min = localISOTime;
   }
 
+  const locationSelect = form.querySelector('select[name="location"]');
+  const sportSelect = form.querySelector('select[name="sport"]');
+  const areaSelect = form.querySelector('select[name="area"]');
+  let locationsList = [];
+
+  if (locationSelect && sportSelect) {
+    try {
+      const locationsPayload = await apiRequest("backend/public/locations.php");
+      locationsList = locationsPayload.locations || [];
+
+      locationSelect.innerHTML = '<option value="" disabled selected>Select a location...</option>';
+      locationsList.forEach(loc => {
+        const option = document.createElement("option");
+        option.value = loc.name;
+        option.textContent = `${loc.name} (${loc.area})`;
+        locationSelect.append(option);
+      });
+    } catch (err) {
+      console.error("Failed to load locations for form:", err);
+      locationSelect.innerHTML = '<option value="" disabled selected>Failed to load locations</option>';
+    }
+
+    locationSelect.addEventListener("change", () => {
+      const selectedName = locationSelect.value;
+      const selectedLoc = locationsList.find(loc => loc.name === selectedName);
+
+      if (selectedLoc) {
+        if (areaSelect) {
+          areaSelect.value = selectedLoc.area;
+        }
+
+        sportSelect.disabled = false;
+        sportSelect.innerHTML = '<option value="" disabled selected>Select a sport...</option>';
+
+        const sports = selectedLoc.sports ? selectedLoc.sports.split(", ") : [];
+        sports.forEach(sport => {
+          const option = document.createElement("option");
+          option.value = sport;
+          option.textContent = sport;
+          sportSelect.append(option);
+        });
+      } else {
+
+        sportSelect.disabled = true;
+        sportSelect.innerHTML = '<option value="" disabled selected>First select the location...</option>';
+        if (areaSelect) {
+          areaSelect.value = "";
+        }
+      }
+    });
+  }
+
   if (guestPanel) {
     guestPanel.hidden = true;
   }
@@ -713,8 +765,13 @@ const initializeCreateEventForm = async () => {
       });
 
       form.reset();
+      if (sportSelect) {
+        sportSelect.disabled = true;
+        sportSelect.innerHTML = '<option value="" disabled selected>First select the location...</option>';
+      }
       setEventFormMessage(form, result.message || "Event created.");
       await loadEventsList();
+
     } catch (error) {
       const errorPayload = error.payload || {};
 
@@ -959,7 +1016,95 @@ const loadEventDetails = async () => {
     detailRoot.classList.add("event-missing");
   }
 };
+// Map Initialization and Rendering using Leaflet & OpenStreetMap
+const renderMapLocations = (map, locations) => {
+  const resultsRoot = document.querySelector(".results-panel");
+
+  if (resultsRoot) {
+    resultsRoot.replaceChildren();
+
+    const heading = document.createElement("div");
+    heading.className = "section-heading compact";
+    heading.innerHTML = '<div><p class="eyebrow">Nearby</p><h2>Venues and events</h2></div>';
+    resultsRoot.append(heading);
+
+    if (!locations.length) {
+      const empty = document.createElement("p");
+      empty.className = "venue-item";
+      empty.innerHTML = "<div><h3>No venues found</h3><p>Try again later.</p></div>";
+      resultsRoot.append(empty);
+    }
+  }
+
+  locations.forEach((loc) => {
+    // Add Marker to Leaflet Map
+    const marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
+
+    // Bind description popup
+    const sportsText = loc.sports ? `<br><strong>Sports:</strong> ${loc.sports}` : "";
+    const popupContent = `
+      <div style="font-family: inherit; color: var(--ink);">
+        <strong style="font-size: 1.1rem; display: block; margin-bottom: 0.2rem;">${loc.name}</strong>
+        <span style="color: var(--muted); font-size: 0.9rem;">${loc.address}</span><br>
+        <span style="font-size: 0.9rem;">Area: <strong>${loc.area}</strong></span>
+        ${sportsText}
+      </div>
+    `;
+    marker.bindPopup(popupContent);
+
+    // Render in Sidebar
+    if (resultsRoot) {
+      const article = document.createElement("article");
+      article.className = "venue-item";
+      article.style.cursor = "pointer";
+
+      article.innerHTML = `
+        <div>
+          <h3>${loc.name}</h3>
+          <p>${loc.sports || "No sports registered"}</p>
+        </div>
+        <span>${loc.activeEventsCount} events</span>
+      `;
+
+      // Focus map and open popup on click
+      article.addEventListener("click", () => {
+        map.setView([loc.latitude, loc.longitude], 15);
+        marker.openPopup();
+      });
+
+      resultsRoot.append(article);
+    }
+  });
+};
+
+const initializeSearchMap = async () => {
+  const mapElement = document.querySelector("#map");
+  if (!mapElement) {
+    return;
+  }
+
+  const map = L.map('map').setView([47.1622, 27.5889], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  delete L.Icon.Default.prototype._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  });
+
+  try {
+    const payload = await apiRequest("backend/public/locations.php");
+    renderMapLocations(map, payload.locations || []);
+  } catch (error) {
+    console.error("Could not load map locations:", error);
+  }
+};
 
 loadEventsList();
 initializeCreateEventForm();
 loadEventDetails();
+initializeSearchMap();

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search | Local Greetings</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
@@ -63,18 +64,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4Zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1A9 9 0 0 0 11 20.9V23h2v-2.1A9 9 0 0 0 20.9 13H23v-2ZM12 19a7 7 0 1 1 7-7 7 7 0 0 1-7 7Z"></path></svg>
         </button>
       </div>
-
-      <div class="map-canvas" role="img" aria-label="Design map for gyms and courts in Iasi">
-        <span class="map-road road-one"></span>
-        <span class="map-road road-two"></span>
-        <span class="map-road road-three"></span>
-        <span class="map-area area-one">Copou</span>
-        <span class="map-area area-two">Palas</span>
-        <span class="map-area area-three">Ciric</span>
-        <span class="pin pin-primary" style="--x: 38%; --y: 32%;"><span>3</span></span>
-        <span class="pin pin-secondary" style="--x: 68%; --y: 50%;"><span>5</span></span>
-        <span class="pin pin-accent" style="--x: 53%; --y: 72%;"><span>2</span></span>
-      </div>
+      <div id="map" style="height: 520px; border-radius: 8px; border: 1px solid var(--line); margin-top: 1rem; position: relative; z-index: 1;"></div>
     </div>
 
     <aside class="results-panel" aria-label="Results near map">
@@ -160,6 +150,7 @@
   </section>
 </main>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>
