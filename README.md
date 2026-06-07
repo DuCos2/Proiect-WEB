@@ -29,6 +29,19 @@ http://localhost/Proiect-WEB/
 
 Paginile HTML nu trebuie deschise direct din filesystem pentru login/register, deoarece formularele folosesc servicii PHP prin `fetch`.
 
+Autentificarea foloseste tokeni salvati in tabela `auth_tokens`, trimisi din frontend prin headerul `Authorization: Bearer ...`. Nu mai sunt folosite sesiuni PHP in `backend/storage/sessions`.
+
+Daca baza de date exista deja inainte de aceasta schimbare, ruleaza o singura data:
+
+```sql
+CREATE TABLE `login_attempts` (
+  `email` varchar(255) PRIMARY KEY,
+  `attempt_count` int NOT NULL DEFAULT 0,
+  `locked_until` datetime DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
 ## Email local si SMTP
 
 Emailurile pentru verificare cont si resetare parola sunt salvate local in:

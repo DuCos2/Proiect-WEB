@@ -66,22 +66,12 @@
       <h2>Join this event</h2>
       <p id="detail-location">Choose an event to see the location.</p>
 
-      <form class="signup-form" id="signup-form">
-        <label>
-          Full name
-          <input type="text" name="name" autocomplete="name" required>
-        </label>
-        <label>
-          Email
-          <input type="email" name="email" autocomplete="email" required>
-        </label>
-        <label>
-          Message for organizer
-          <textarea name="message" rows="4" placeholder="Optional"></textarea>
-        </label>
-        <button class="btn btn-primary" type="submit">Register for event</button>
+      <div class="signup-actions" data-event-actions>
+        <button class="btn btn-primary" type="button" id="join-event-button">Register for event</button>
+        <button class="btn btn-outline btn-danger" type="button" id="delete-event-button" hidden>Delete event</button>
+        <a class="btn btn-primary" href="login.html" id="login-before-join" hidden>Login before registering</a>
         <p class="form-message" id="signup-message" role="status" aria-live="polite"></p>
-      </form>
+      </div>
     </aside>
   </section>
 
@@ -99,6 +89,10 @@
     <article class="detail-panel">
       <h2>Event plan</h2>
       <ul class="clean-list" id="detail-plan"></ul>
+    </article>
+    <article class="detail-panel" id="participants-panel" hidden>
+      <h2>Participants</h2>
+      <ul class="clean-list" id="detail-participants"></ul>
     </article>
   </section>
 </main>

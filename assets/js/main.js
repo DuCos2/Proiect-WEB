@@ -464,143 +464,502 @@ updateProfilePage();
 updateAuthNavigation();
 loadProfileStats();
 
-const eventDetails = {
-  "copou-football": {
-    title: "Quick match in Copou",
-    sport: "Football",
-    date: "Today",
-    time: "18:30",
-    spots: "3 left",
-    location: "Copou Arena",
-    area: "Copou",
-    level: "Mixed level",
-    organizer: "Local Greetings Team",
-    badge: "Football",
-    description: "Artificial turf, 5 vs 5, friendly pace, and open registration for players who want a quick match after work.",
-    plan: [
-      ["18:15", "Arrival and teams"],
-      ["18:30", "Warm-up"],
-      ["18:45", "Match starts"],
-      ["20:00", "Wrap-up"]
-    ]
-  },
-  "palas-basketball": {
-    title: "Free play at Palas",
-    sport: "Basketball",
-    date: "Tomorrow",
-    time: "19:00",
-    spots: "5 left",
-    location: "Palas Sport Court",
-    area: "Palas",
-    level: "Beginner friendly",
-    organizer: "Andrei M.",
-    badge: "Basketball",
-    description: "Public basketball session for people who want to play after work, rotate teams, and meet new players.",
-    plan: [
-      ["18:50", "Meet near the court"],
-      ["19:00", "Warm-up shots"],
-      ["19:15", "Rotating teams"],
-      ["20:30", "Cool down"]
-    ]
-  },
-  "ciric-tennis": {
-    title: "Doubles at Ciric Base",
-    sport: "Tennis",
-    date: "Saturday",
-    time: "10:00",
-    spots: "2 left",
-    location: "Ciric Base",
-    area: "Ciric",
-    level: "Intermediate",
-    organizer: "Mara P.",
-    badge: "Tennis",
-    description: "Two reserved courts for doubles, with registration open for players who already know the basics.",
-    plan: [
-      ["09:45", "Court check-in"],
-      ["10:00", "Warm-up"],
-      ["10:15", "Doubles games"],
-      ["12:00", "Court release"]
-    ]
+const parseEventDate = (eventDate) => {
+  if (!eventDate) {
+    return null;
+  }
+
+  const parsedDate = new Date(String(eventDate).replace(" ", "T"));
+
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+const eventDateLabel = (eventDate) => {
+  const parsedDate = parseEventDate(eventDate);
+
+  if (!parsedDate) {
+    return "Date pending";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric"
+  }).format(parsedDate);
+};
+
+const eventTimeLabel = (eventDate) => {
+  const parsedDate = parseEventDate(eventDate);
+
+  if (!parsedDate) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(parsedDate);
+};
+
+const eventSpotsLabel = (eventItem) => {
+  if (eventItem.spotsLeft === null || eventItem.spotsLeft === undefined) {
+    return "Open spots";
+  }
+
+  if (eventItem.spotsLeft <= 0) {
+    return "Full";
+  }
+
+  return eventItem.spotsLeft === 1 ? "1 spot left" : `${eventItem.spotsLeft} spots left`;
+};
+
+const sportClassName = (sport) => {
+  const normalizedSport = String(sport || "").toLowerCase();
+
+  if (normalizedSport.includes("basket")) {
+    return "basketball";
+  }
+
+  if (normalizedSport.includes("tennis")) {
+    return "tennis";
+  }
+
+  return "football";
+};
+
+const setPageText = (selector, value) => {
+  const element = document.querySelector(selector);
+
+  if (element) {
+    element.textContent = value;
   }
 };
 
-const detailRoot = document.querySelector("#event-detail");
+const renderEventCard = (eventItem) => {
+  const article = document.createElement("article");
+  const media = document.createElement("div");
+  const body = document.createElement("div");
+  const topline = document.createElement("div");
+  const sport = document.createElement("span");
+  const time = document.createElement("strong");
+  const title = document.createElement("h3");
+  const description = document.createElement("p");
+  const footer = document.createElement("div");
+  const location = document.createElement("span");
+  const details = document.createElement("a");
 
-if (detailRoot) {
-  const params = new URLSearchParams(window.location.search);
-  const eventId = params.get("id") || "copou-football";
-  const eventItem = eventDetails[eventId];
+  article.className = "event-card";
+  media.className = `card-media ${sportClassName(eventItem.sport)}`;
+  body.className = "card-body";
+  topline.className = "card-topline";
+  footer.className = "card-footer";
 
-  const setText = (selector, value) => {
-    const element = document.querySelector(selector);
+  sport.textContent = eventItem.sport;
+  time.textContent = eventTimeLabel(eventItem.eventDate);
+  title.textContent = eventItem.title;
+  description.textContent = `${eventItem.description} ${eventSpotsLabel(eventItem)}.`;
+  location.textContent = eventItem.location.name;
+  details.href = `event-details.html?id=${eventItem.id}`;
+  details.textContent = "Details";
 
-    if (element) {
-      element.textContent = value;
-    }
-  };
+  topline.append(sport, time);
+  footer.append(location, details);
+  body.append(topline, title, description, footer);
+  article.append(media, body);
 
-  if (eventItem) {
-    document.title = `${eventItem.title} | Local Greetings`;
+  return article;
+};
 
-    setText("#detail-sport", eventItem.sport);
-    setText("#detail-title", eventItem.title);
-    setText("#detail-description", eventItem.description);
-    setText("#detail-date", eventItem.date);
-    setText("#detail-time", eventItem.time);
-    setText("#detail-spots", eventItem.spots);
-    setText("#detail-badge", eventItem.badge);
-    setText("#detail-location", `${eventItem.location}, ${eventItem.area}`);
-    setText("#detail-place", eventItem.location);
-    setText("#detail-area", eventItem.area);
-    setText("#detail-level", eventItem.level);
-    setText("#detail-organizer", eventItem.organizer);
+const updateFeaturedEvent = (eventItem) => {
+  const featuredRoot = document.querySelector("[data-featured-event]");
 
-    const planList = document.querySelector("#detail-plan");
-
-    if (planList) {
-      planList.replaceChildren();
-
-      eventItem.plan.forEach(([time, label]) => {
-        const item = document.createElement("li");
-        const timeElement = document.createElement("span");
-        const labelElement = document.createElement("strong");
-
-        timeElement.textContent = time;
-        labelElement.textContent = label;
-
-        item.append(timeElement, labelElement);
-        planList.append(item);
-      });
-    }
-  } else {
-    setText("#detail-title", "Event not found");
-    setText("#detail-description", "This event is no longer available. Go back to the events list and choose another one.");
-    detailRoot.classList.add("event-missing");
+  if (!featuredRoot) {
+    return;
   }
 
-  const signupForm = document.querySelector("#signup-form");
-  const signupMessage = document.querySelector("#signup-message");
+  if (!eventItem) {
+    setPageText("[data-featured-sport]", "Event");
+    setPageText("[data-featured-date]", "No events");
+    setPageText("[data-featured-title]", "No events yet");
+    setPageText("[data-featured-summary]", "Add the first event and it will appear here.");
+    setPageText("[data-featured-area]", "Iasi");
+    setPageText("[data-featured-participants]", "0 participants");
+    return;
+  }
 
-  if (signupForm && signupMessage) {
-    signupForm.addEventListener("submit", (event) => {
-      event.preventDefault();
+  const detailsLink = document.querySelector("[data-featured-link]");
 
-      const formData = new FormData(signupForm);
-      const registrations = JSON.parse(localStorage.getItem("eventRegistrations") || "[]");
+  setPageText("[data-featured-sport]", eventItem.sport);
+  setPageText("[data-featured-date]", `${eventDateLabel(eventItem.eventDate)}, ${eventTimeLabel(eventItem.eventDate)}`);
+  setPageText("[data-featured-title]", eventItem.title);
+  setPageText("[data-featured-summary]", `${eventSpotsLabel(eventItem)}. ${eventItem.skillLevel}.`);
+  setPageText("[data-featured-area]", eventItem.location.area);
+  setPageText("[data-featured-participants]", `${eventItem.participantCount} participants`);
 
-      registrations.push({
-        eventId,
-        name: formData.get("name"),
-        email: formData.get("email"),
-        message: formData.get("message"),
-        createdAt: new Date().toISOString()
+  if (detailsLink) {
+    detailsLink.href = `event-details.html?id=${eventItem.id}`;
+  }
+};
+
+const loadEventsList = async () => {
+  const eventsRoot = document.querySelector("[data-events-list]");
+
+  if (!eventsRoot) {
+    return;
+  }
+
+  try {
+    const payload = await apiRequest("backend/public/events.php");
+    eventsRoot.replaceChildren();
+
+    if (!payload.events.length) {
+      const empty = document.createElement("article");
+      empty.className = "event-card";
+      empty.innerHTML = '<div class="card-body"><h3>No events yet</h3><p>Be the first person to add one.</p></div>';
+      eventsRoot.append(empty);
+      updateFeaturedEvent(null);
+      return;
+    }
+
+    updateFeaturedEvent(payload.events[0]);
+
+    payload.events.forEach((eventItem) => {
+      eventsRoot.append(renderEventCard(eventItem));
+    });
+  } catch (error) {
+    eventsRoot.innerHTML = '<article class="event-card"><div class="card-body"><h3>Events could not be loaded</h3><p>Try refreshing the page.</p></div></article>';
+  }
+};
+
+const setEventFormMessage = (form, message, type = "success") => {
+  const messageElement = form.querySelector("[data-event-message]");
+
+  if (!messageElement) {
+    return;
+  }
+
+  messageElement.textContent = message;
+  messageElement.classList.add("visible");
+  messageElement.classList.toggle("error", type === "error");
+};
+
+const initializeCreateEventForm = async () => {
+  const form = document.querySelector("[data-event-form]");
+  const guestPanel = document.querySelector("[data-event-guest]");
+
+  if (!form) {
+    return;
+  }
+
+  const user = await loadCurrentUser();
+
+  if (!user) {
+    form.hidden = true;
+
+    if (guestPanel) {
+      guestPanel.hidden = false;
+    }
+
+    return;
+  }
+
+  form.hidden = false;
+
+  const dateInput = form.querySelector('input[name="event_date"]');
+  if (dateInput) {
+    const now = new Date();
+    const tzOffset = now.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(now - tzOffset).toISOString().slice(0, 16);
+    dateInput.min = localISOTime;
+  }
+
+  if (guestPanel) {
+    guestPanel.hidden = true;
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const submitButton = form.querySelector("[type='submit']");
+    const payload = Object.fromEntries(new FormData(form).entries());
+    const selectedLevels = Array.from(form.querySelectorAll('input[name="skill_levels"]:checked')).map(checkbox => checkbox.value);
+
+    let skillLevelString = "";
+    if (selectedLevels.length === 3) {
+      skillLevelString = "All levels";
+    } else if (selectedLevels.length > 0) {
+      skillLevelString = selectedLevels.join(", ");
+    } else {
+      skillLevelString = "Mixed level";
+    }
+    payload.skill_level = skillLevelString;
+    delete payload.skill_levels;
+
+    setFormErrors(form);
+    setEventFormMessage(form, "Saving event...");
+
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
+
+    try {
+      const csrfToken = await getCsrfToken();
+      const result = await apiRequest("backend/public/events.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify(payload)
       });
 
-      localStorage.setItem("eventRegistrations", JSON.stringify(registrations));
-      signupForm.reset();
+      form.reset();
+      setEventFormMessage(form, result.message || "Event created.");
+      await loadEventsList();
+    } catch (error) {
+      const errorPayload = error.payload || {};
 
-      signupMessage.textContent = "Registration sent. The organizer will contact you soon.";
-      signupMessage.classList.add("visible");
+      if (errorPayload.message === "Authentication required.") {
+        window.location.assign("login.html");
+        return;
+      }
+
+      setFormErrors(form, errorPayload.errors);
+      setEventFormMessage(form, errorPayload.message || error.message, "error");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
+  });
+};
+
+const renderEventPlan = (eventItem) => {
+  const planList = document.querySelector("#detail-plan");
+
+  if (!planList) {
+    return;
+  }
+
+  planList.replaceChildren();
+
+  [
+    ["Meet", `${eventTimeLabel(eventItem.eventDate)} at ${eventItem.location.name}`],
+    ["Sport", eventItem.sport],
+    ["Group", `${eventItem.participantCount}/${eventItem.maxParticipants || "open"} registered`],
+    ["Status", eventItem.isFull ? "Full" : "Registration open"]
+  ].forEach(([label, value]) => {
+    const item = document.createElement("li");
+    const labelElement = document.createElement("span");
+    const valueElement = document.createElement("strong");
+
+    labelElement.textContent = label;
+    valueElement.textContent = value;
+    item.append(labelElement, valueElement);
+    planList.append(item);
+  });
+};
+
+const renderParticipantsList = (participants) => {
+  const participantsRoot = document.querySelector("#detail-participants");
+  const panel = document.querySelector("#participants-panel");
+
+  if (!participantsRoot || !panel) {
+    return;
+  }
+
+  participantsRoot.replaceChildren();
+
+  if (!participants.length) {
+    const item = document.createElement("li");
+    item.innerHTML = "<span>No participants yet</span>";
+    participantsRoot.append(item);
+  } else {
+    participants.forEach((username, index) => {
+      const item = document.createElement("li");
+      const numElement = document.createElement("span");
+      const nameElement = document.createElement("strong");
+
+      numElement.textContent = `#${index + 1}`;
+      nameElement.textContent = username;
+      item.append(numElement, nameElement);
+      participantsRoot.append(item);
     });
   }
-}
+
+  panel.hidden = false;
+};
+
+const updateJoinControls = async (eventItem) => {
+  const joinButton = document.querySelector("#join-event-button");
+  const loginLink = document.querySelector("#login-before-join");
+  const signupMessage = document.querySelector("#signup-message");
+
+  if (!joinButton || !loginLink || !signupMessage) {
+    return;
+  }
+
+  const user = await loadCurrentUser();
+
+  if (!user) {
+    joinButton.hidden = true;
+    loginLink.hidden = false;
+    signupMessage.textContent = "You need to be logged in before registering.";
+    signupMessage.classList.add("visible");
+    return;
+  }
+
+  loginLink.hidden = true;
+  joinButton.hidden = false;
+  joinButton.disabled = eventItem.userJoined || eventItem.isFull;
+  joinButton.textContent = eventItem.userJoined ? "Already registered" : "Register for event";
+
+  await updateOrganizerControls(eventItem, user);
+
+  if (eventItem.isFull && !eventItem.userJoined) {
+    signupMessage.textContent = "This event is already full.";
+    signupMessage.classList.add("visible");
+  }
+
+  joinButton.addEventListener("click", async () => {
+    joinButton.disabled = true;
+    signupMessage.textContent = "Registering...";
+    signupMessage.classList.add("visible");
+    signupMessage.classList.remove("error");
+
+    try {
+      const csrfToken = await getCsrfToken();
+      const result = await apiRequest("backend/public/event-join.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify({ event_id: eventItem.id })
+      });
+
+      signupMessage.textContent = result.message || "You are registered for this event.";
+      updateEventDetails(result.event);
+      await updateJoinControls(result.event);
+    } catch (error) {
+      const errorPayload = error.payload || {};
+
+      if (errorPayload.message === "Authentication required.") {
+        window.location.assign("login.html");
+        return;
+      }
+
+      signupMessage.textContent = errorPayload.message || error.message;
+      signupMessage.classList.add("error");
+      joinButton.disabled = false;
+    }
+  }, { once: true });
+};
+
+const updateOrganizerControls = async (eventItem, user) => {
+  const deleteButton = document.querySelector("#delete-event-button");
+  if (!deleteButton) {
+    return;
+  }
+
+  const isOrganizer = user && Number(user.id) === Number(eventItem.organizerId);
+
+  if (!isOrganizer) {
+    deleteButton.hidden = true;
+    return;
+  }
+
+  deleteButton.hidden = false;
+
+  const newDeleteButton = deleteButton.cloneNode(true);
+  deleteButton.parentNode.replaceChild(newDeleteButton, deleteButton);
+
+  newDeleteButton.addEventListener("click", async () => {
+    if (!confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
+      return;
+    }
+
+    newDeleteButton.disabled = true;
+    const signupMessage = document.querySelector("#signup-message");
+    if (signupMessage) {
+      signupMessage.textContent = "Deleting event...";
+      signupMessage.classList.add("visible");
+      signupMessage.classList.remove("error");
+    }
+
+    try {
+      const csrfToken = await getCsrfToken();
+      await apiRequest(`backend/public/event.php?id=${encodeURIComponent(eventItem.id)}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken
+        }
+      });
+
+      if (signupMessage) {
+        signupMessage.textContent = "Event deleted successfully. Redirecting...";
+      }
+      setTimeout(() => {
+        window.location.assign("index.html");
+      }, 1500);
+    } catch (error) {
+      const errorPayload = error.payload || {};
+      if (signupMessage) {
+        signupMessage.textContent = errorPayload.message || error.message;
+        signupMessage.classList.add("error");
+      }
+      newDeleteButton.disabled = false;
+    }
+  });
+};
+
+const updateEventDetails = (eventItem) => {
+  document.title = `${eventItem.title} | Local Greetings`;
+
+  setPageText("#detail-sport", eventItem.sport);
+  setPageText("#detail-title", eventItem.title);
+  setPageText("#detail-description", eventItem.description);
+  setPageText("#detail-date", eventDateLabel(eventItem.eventDate));
+  setPageText("#detail-time", eventTimeLabel(eventItem.eventDate));
+  setPageText("#detail-spots", eventSpotsLabel(eventItem));
+  setPageText("#detail-badge", eventItem.sport);
+  setPageText("#detail-location", `${eventItem.location.name}, ${eventItem.location.area}`);
+  setPageText("#detail-place", eventItem.location.name);
+  setPageText("#detail-area", eventItem.location.area);
+  setPageText("#detail-level", eventItem.skillLevel);
+  setPageText("#detail-organizer", eventItem.organizer);
+  renderEventPlan(eventItem);
+  renderParticipantsList(eventItem.participants || []);
+};
+
+const loadEventDetails = async () => {
+  const detailRoot = document.querySelector("#event-detail");
+
+  if (!detailRoot) {
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const eventId = params.get("id");
+
+  if (!eventId) {
+    setPageText("#detail-title", "Event not found");
+    setPageText("#detail-description", "Go back to the events list and choose an event.");
+    detailRoot.classList.add("event-missing");
+    return;
+  }
+
+  try {
+    const payload = await apiRequest(`backend/public/event.php?id=${encodeURIComponent(eventId)}`);
+    updateEventDetails(payload.event);
+    await updateJoinControls(payload.event);
+  } catch (error) {
+    setPageText("#detail-title", "Event not found");
+    setPageText("#detail-description", "This event is no longer available. Go back to the events list and choose another one.");
+    detailRoot.classList.add("event-missing");
+  }
+};
+
+loadEventsList();
+initializeCreateEventForm();
+loadEventDetails();

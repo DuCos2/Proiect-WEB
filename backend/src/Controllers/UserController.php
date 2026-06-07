@@ -8,7 +8,6 @@ use App\Support\Csrf;
 use App\Support\Mailer;
 use App\Support\Request;
 use App\Support\Response;
-use App\Support\Session;
 use App\Support\Url;
 use PDOException;
 
@@ -93,15 +92,16 @@ final class UserController
             Response::json(['message' => 'Invalid email or password.'], 401);
         }
 
-        if ($this->isLocked($email)) {
+        $users = $this->requireUsers();
+
+        if ($this->isLocked($users, $email)) {
             Response::json(['message' => 'Too many login attempts. Try again in a few minutes.'], 429);
         }
 
-        $users = $this->requireUsers();
         $user = $users->findByEmail($email);
 
         if ($user === null || !password_verify($password, $user['password_hash'])) {
-            $this->recordFailedLogin($email);
+            $this->recordFailedLogin($users, $email);
             Response::json(['message' => 'Invalid email or password.'], 401);
         }
 
@@ -125,15 +125,17 @@ final class UserController
         $token = $this->newToken();
         $users->createAuthToken((int) $user['id'], Auth::tokenHash($token));
 
-        $this->clearFailedLogins($email);
-        Session::login($user);
+        $this->clearFailedLogins($users, $email);
         Response::json(['message' => 'Logged in.', 'user' => $this->publicUser($user), 'token' => $token]);
     }
 
     public function me(): void
     {
         $user = Auth::user($this->users);
-        Response::json(['authenticated' => $user !== null, 'user' => $user]);
+        Response::json([
+            'authenticated' => $user !== null,
+            'user' => $user !== null ? $this->publicUser($user) : null,
+        ]);
     }
 
     public function logout(): void
@@ -145,7 +147,6 @@ final class UserController
             $this->users->revokeAuthToken(Auth::tokenHash($token));
         }
 
-        Session::logout();
         Response::json(['message' => 'Logged out.']);
     }
 
@@ -228,8 +229,10 @@ final class UserController
             Response::json(['message' => 'This verification link is invalid or expired.'], 400);
         }
 
-        Session::login($user);
-        Response::json(['message' => 'Email verified.', 'user' => $this->publicUser($user)]);
+        $token = $this->newToken();
+        $this->requireUsers()->createAuthToken((int) $user['id'], Auth::tokenHash($token));
+
+        Response::json(['message' => 'Email verified.', 'user' => $this->publicUser($user), 'token' => $token]);
     }
 
     public function resendVerification(array $payload): void
@@ -302,31 +305,33 @@ final class UserController
         ];
     }
 
-    private function isLocked(string $email): bool
+    private function isLocked(User $users, string $email): bool
     {
-        $attempt = $_SESSION['login_attempts'][$email] ?? null;
+        $attempt = $users->findLoginAttempt($email);
 
         return is_array($attempt)
             && isset($attempt['locked_until'])
-            && time() < (int) $attempt['locked_until'];
+            && $attempt['locked_until'] !== null
+            && strtotime((string) $attempt['locked_until']) > time();
     }
 
-    private function recordFailedLogin(string $email): void
+    private function recordFailedLogin(User $users, string $email): void
     {
-        $attempt = $_SESSION['login_attempts'][$email] ?? ['count' => 0, 'locked_until' => 0];
-        $attempt['count'] = (int) $attempt['count'] + 1;
+        $attempt = $users->findLoginAttempt($email) ?? ['attempt_count' => 0, 'locked_until' => null];
+        $attemptCount = (int) $attempt['attempt_count'] + 1;
+        $lockedUntil = null;
 
-        if ($attempt['count'] >= self::MAX_LOGIN_ATTEMPTS) {
-            $attempt['locked_until'] = time() + self::LOCK_SECONDS;
-            $attempt['count'] = 0;
+        if ($attemptCount >= self::MAX_LOGIN_ATTEMPTS) {
+            $lockedUntil = date('Y-m-d H:i:s', time() + self::LOCK_SECONDS);
+            $attemptCount = 0;
         }
 
-        $_SESSION['login_attempts'][$email] = $attempt;
+        $users->saveLoginAttempt($email, $attemptCount, $lockedUntil);
     }
 
-    private function clearFailedLogins(string $email): void
+    private function clearFailedLogins(User $users, string $email): void
     {
-        unset($_SESSION['login_attempts'][$email]);
+        $users->deleteLoginAttempt($email);
     }
 
     private function textLength(string $value): int

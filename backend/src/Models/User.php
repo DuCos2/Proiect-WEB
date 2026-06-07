@@ -67,7 +67,7 @@ final class User
     public function findByAuthTokenHash(string $tokenHash): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT users.id, users.username, users.email, users.password_hash, users.role, users.is_banned, users.email_verified_at
+            'SELECT users.id, users.username, users.email, users.role, users.is_banned, users.email_verified_at
              FROM auth_tokens
              INNER JOIN users ON users.id = auth_tokens.user_id
              WHERE auth_tokens.token_hash = :token_hash
@@ -85,6 +85,43 @@ final class User
     {
         $statement = $this->pdo->prepare('UPDATE auth_tokens SET revoked_at = NOW() WHERE token_hash = :token_hash');
         $statement->execute(['token_hash' => $tokenHash]);
+    }
+
+    public function findLoginAttempt(string $email): ?array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT email, attempt_count, locked_until
+             FROM login_attempts
+             WHERE email = :email
+             LIMIT 1'
+        );
+        $statement->execute(['email' => $email]);
+        $attempt = $statement->fetch();
+
+        return $attempt ?: null;
+    }
+
+    public function saveLoginAttempt(string $email, int $attemptCount, ?string $lockedUntil): void
+    {
+        $statement = $this->pdo->prepare(
+            'INSERT INTO login_attempts (email, attempt_count, locked_until)
+             VALUES (:email, :attempt_count, :locked_until)
+             ON DUPLICATE KEY UPDATE
+                attempt_count = VALUES(attempt_count),
+                locked_until = VALUES(locked_until),
+                updated_at = NOW()'
+        );
+        $statement->execute([
+            'email' => $email,
+            'attempt_count' => $attemptCount,
+            'locked_until' => $lockedUntil,
+        ]);
+    }
+
+    public function deleteLoginAttempt(string $email): void
+    {
+        $statement = $this->pdo->prepare('DELETE FROM login_attempts WHERE email = :email');
+        $statement->execute(['email' => $email]);
     }
 
     public function createEmailVerification(int $userId, string $tokenHash): void

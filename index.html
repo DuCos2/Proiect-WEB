@@ -51,23 +51,24 @@
       </div>
     </div>
 
-    <div class="event-spotlight" aria-label="Featured event">
+    <div class="event-spotlight" aria-label="Featured event" data-featured-event>
       <div class="spotlight-top">
-        <span class="sport-badge">Football</span>
-        <span class="date-badge">Today, 18:30</span>
+        <span class="sport-badge" data-featured-sport>Event</span>
+        <span class="date-badge" data-featured-date>Loading</span>
       </div>
-      <h2>5 vs 5 Match at Copou Court</h2>
-      <p>3 spots left. Friendly level, first-come first-served registration.</p>
+      <h2 data-featured-title>Loading featured event...</h2>
+      <p data-featured-summary>The latest event will appear here.</p>
       <div class="spotlight-meta">
           <span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.3 7 13 7 13s7-7.7 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5Z"></path></svg>
-            Copou
+            <span data-featured-area>Iasi</span>
           </span>
         <span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11h10v2H7Zm0 4h7v2H7ZM6 2h2v2h8V2h2v2h2v18H4V4h2Zm12 6H6v12h12Z"></path></svg>
-            12 participants
+            <span data-featured-participants>0 participants</span>
           </span>
       </div>
+      <a class="spotlight-link" href="#events" data-featured-link>Details</a>
     </div>
   </section>
 
@@ -80,54 +81,102 @@
       <a class="text-link" href="search.html">Search by venue</a>
     </div>
 
-    <div class="event-grid" id="events">
+    <div class="event-grid" id="events" data-events-list>
       <article class="event-card">
-        <div class="card-media football"></div>
         <div class="card-body">
-          <div class="card-topline">
-            <span>Football</span>
-            <strong>18:30</strong>
-          </div>
-          <h3>Quick match in Copou</h3>
-          <p>Artificial turf, 5 vs 5, mixed level. Open registration for 3 more people.</p>
-          <div class="card-footer">
-            <span>Copou Arena</span>
-            <a href="event-details.html?id=copou-football">Details</a>
-          </div>
+          <h3>Loading events...</h3>
+          <p>The event list is loading from the database.</p>
         </div>
       </article>
+    </div>
+  </section>
 
-      <article class="event-card">
-        <div class="card-media basketball"></div>
-        <div class="card-body">
-          <div class="card-topline">
-            <span>Basketball</span>
-            <strong>Tomorrow</strong>
-          </div>
-          <h3>Free play at Palas</h3>
-          <p>Public event for people who want to play after work, no fixed team.</p>
-          <div class="card-footer">
-            <span>Palas Sport Court</span>
-            <a href="event-details.html?id=palas-basketball">Details</a>
-          </div>
-        </div>
-      </article>
+  <section class="section-band">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Create</p>
+        <h2>Add a new event</h2>
+      </div>
+    </div>
 
-      <article class="event-card">
-        <div class="card-media tennis"></div>
-        <div class="card-body">
-          <div class="card-topline">
-            <span>Tennis</span>
-            <strong>Saturday</strong>
+    <div class="create-event-panel">
+      <div class="create-event-guest" data-event-guest hidden>
+        <p>You need to be logged in before adding a new event.</p>
+        <a class="btn btn-primary" href="login.html">Login to add event</a>
+      </div>
+
+      <form class="event-form" data-event-form hidden>
+        <label>
+          Event title
+          <input type="text" name="title" placeholder="Quick match in Copou" required>
+        </label>
+        <label>
+          Sport
+          <select name="sport" required>
+            <option value="" disabled selected>Select a sport...</option>
+            <option value="Football">Football</option>
+            <option value="Basketball">Basketball</option>
+            <option value="Tennis">Tennis</option>
+            <option value="Volleyball">Volleyball</option>
+            <option value="Running">Running</option>
+            <option value="Cycling">Cycling</option>
+            <option value="Badminton">Badminton</option>
+            <option value="Table Tennis">Table Tennis</option>
+          </select>
+        </label>
+        <label>
+          Date and time
+          <input type="datetime-local" name="event_date" required>
+        </label>
+        <label>
+          Max participants
+          <input type="number" name="max_participants" min="2" max="100" value="10" required>
+        </label>
+        <label>
+          Location
+          <input type="text" name="location" placeholder="Copou Arena" required>
+        </label>
+        <label>
+          Area
+          <select name="area" required>
+            <option value="" disabled selected>Select an area...</option>
+            <option value="Centru">Centru</option>
+            <option value="Copou">Copou</option>
+            <option value="Tatarasi">Tătărași</option>
+            <option value="Pacurari">Păcurari</option>
+            <option value="Nicolina">Nicolina</option>
+            <option value="Alexandru">Alexandru cel Bun</option>
+            <option value="Gara">Gara</option>
+            <option value="Galata">Galata</option>
+            <option value="Ciric">Ciric</option>
+            <option value="Podu Ros">Podu Roș</option>
+            <option value="Cantemir">Cantemir</option>
+            <option value="CUG">CUG</option>
+            <option value="Dacia">Dacia</option>
+            <option value="Bucium">Bucium</option>
+          </select>
+        </label>
+        <label class="event-form-wide">
+          Level (select all that apply)
+          <div class="skill-level-checkboxes">
+            <label class="checkbox-label">
+              <input type="checkbox" name="skill_levels" value="Beginner"> Beginner
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="skill_levels" value="Medium"> Medium
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="skill_levels" value="Expert"> Expert
+            </label>
           </div>
-          <h3>Doubles at Ciric Base</h3>
-          <p>Two reserved courts, registration for people with at least 2 similar participations.</p>
-          <div class="card-footer">
-            <span>Ciric Base</span>
-            <a href="event-details.html?id=ciric-tennis">Details</a>
-          </div>
-        </div>
-      </article>
+        </label>
+        <label class="event-form-wide">
+          Description
+          <textarea name="description" rows="4" placeholder="Short details about the meetup" required></textarea>
+        </label>
+        <button class="btn btn-primary" type="submit">Add event</button>
+        <p class="form-message event-form-wide" data-event-message role="status" aria-live="polite"></p>
+      </form>
     </div>
   </section>
 

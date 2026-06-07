@@ -41,6 +41,13 @@ CREATE TABLE `auth_tokens` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE `login_attempts` (
+  `email` varchar(255) PRIMARY KEY,
+  `attempt_count` int NOT NULL DEFAULT 0,
+  `locked_until` datetime DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE `sports` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255)

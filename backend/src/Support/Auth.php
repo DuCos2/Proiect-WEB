@@ -14,7 +14,7 @@ final class Auth
             return $users->findByAuthTokenHash(self::tokenHash($token));
         }
 
-        return Session::user();
+        return null;
     }
 
     public static function tokenHash(string $token): string
