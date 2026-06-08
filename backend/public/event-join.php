@@ -4,8 +4,10 @@ require_once __DIR__ . '/../bootstrap.php';
 
 use App\Controllers\EventController;
 use App\Models\Event;
+use App\Models\Location;
 use App\Models\User;
 use App\Support\Database;
+use App\Support\Mailer;
 use App\Support\Request;
 use App\Support\Response;
 
@@ -19,4 +21,4 @@ if ($id === false || $id === null) {
 }
 
 $pdo = Database::connection();
-(new EventController(new Event($pdo), new User($pdo)))->join($id);
+(new EventController(new Event($pdo), new User($pdo), new Location($pdo), new Mailer()))->join($id);

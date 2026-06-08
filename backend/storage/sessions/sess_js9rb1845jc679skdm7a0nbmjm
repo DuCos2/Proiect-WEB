@@ -1,0 +1,1 @@
+csrf_token|s:64:"8ca39f06e47bf1ebbca64a6a80a5d8d4b7c93ec11f0be9a9ab931a5408cc45b3";user|a:4:{s:2:"id";i:2;s:8:"username";s:10:"salutsalut";s:5:"email";s:14:"0o4jv@wshu.net";s:4:"role";s:4:"user";}login_attempts|a:2:{s:13:"bob@gmail.com";a:2:{s:5:"count";i:2;s:12:"locked_until";i:0;}s:19:"wahed80645@5nek.com";a:2:{s:5:"count";i:2;s:12:"locked_until";i:0;}}

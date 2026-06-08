@@ -120,13 +120,10 @@ const createLogoutButton = () => {
     button.disabled = true;
 
     try {
-      const csrfToken = await getCsrfToken();
-
       await apiRequest("backend/public/logout.php", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({})
       });
@@ -203,13 +200,10 @@ document.querySelectorAll("[data-auth-form]").forEach((form) => {
     }
 
     try {
-      const csrfToken = await getCsrfToken();
-
       const result = await apiRequest(form.dataset.authEndpoint, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       });
@@ -355,6 +349,19 @@ const renderProfileStats = (profileStats) => {
     if (Object.prototype.hasOwnProperty.call(profileStats, statName)) {
       element.textContent = profileStats[statName];
     }
+    const subscriptionsRoot = document.querySelector("[data-subscriptions]");
+
+  if (subscriptionsRoot) {
+    subscriptionsRoot.replaceChildren();
+
+    if (!profileStats.subscriptions || !profileStats.subscriptions.length) {
+      appendListItem(subscriptionsRoot, "No subscriptions yet", "");
+    } else {
+      profileStats.subscriptions.forEach((sub) => {
+        appendListItem(subscriptionsRoot, sub.name, sub.area);
+      });
+    }
+  }
   });
 
   const sportMixRoot = document.querySelector("[data-sport-mix]");
@@ -754,12 +761,10 @@ const initializeCreateEventForm = async () => {
     }
 
     try {
-      const csrfToken = await getCsrfToken();
       const result = await apiRequest("backend/public/events.php", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       });
@@ -884,12 +889,10 @@ const updateJoinControls = async (eventItem) => {
     signupMessage.classList.remove("error");
 
     try {
-      const csrfToken = await getCsrfToken();
       const result = await apiRequest("backend/public/event-join.php", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ event_id: eventItem.id })
       });
@@ -944,12 +947,10 @@ const updateOrganizerControls = async (eventItem, user) => {
     }
 
     try {
-      const csrfToken = await getCsrfToken();
       await apiRequest(`backend/public/event.php?id=${encodeURIComponent(eventItem.id)}`, {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken
+          "Content-Type": "application/json"
         }
       });
 
@@ -1016,65 +1017,256 @@ const loadEventDetails = async () => {
     detailRoot.classList.add("event-missing");
   }
 };
+const appendLocationHeading = (root, eyebrowText, titleText, action = null) => {
+  const heading = document.createElement("div");
+  const textWrap = document.createElement("div");
+  const eyebrow = document.createElement("p");
+  const title = document.createElement("h2");
+
+  heading.className = "section-heading compact";
+  eyebrow.className = "eyebrow";
+  eyebrow.textContent = eyebrowText;
+  title.textContent = titleText;
+
+  textWrap.append(eyebrow, title);
+  heading.append(textWrap);
+
+  if (action) {
+    heading.append(action);
+  }
+
+  root.append(heading);
+};
+
+const buildLocationPopup = (location) => {
+  const popup = document.createElement("div");
+  const name = document.createElement("strong");
+  const address = document.createElement("span");
+  const area = document.createElement("span");
+
+  popup.className = "map-popup";
+  name.textContent = location.name;
+  address.textContent = location.address || "Address pending";
+  area.textContent = `Area: ${location.area || "Iasi"}`;
+
+  popup.append(name, address, area);
+
+  if (location.sports) {
+    const sports = document.createElement("span");
+    sports.textContent = `Sports: ${location.sports}`;
+    popup.append(sports);
+  }
+
+  return popup;
+};
+
+const renderLocationEventItem = (eventItem) => {
+  const article = document.createElement("article");
+  const body = document.createElement("div");
+  const title = document.createElement("h3");
+  const meta = document.createElement("p");
+  const link = document.createElement("a");
+
+  article.className = "venue-event";
+  title.textContent = eventItem.title;
+  meta.textContent = `${eventItem.sport} · ${eventDateLabel(eventItem.eventDate)}, ${eventTimeLabel(eventItem.eventDate)} · ${eventSpotsLabel(eventItem)}`;
+  link.className = "venue-event-link";
+  link.href = `event-details.html?id=${encodeURIComponent(eventItem.id)}`;
+  link.textContent = "Open";
+
+  body.append(title, meta);
+  article.append(body, link);
+
+  return article;
+};
+
 // Map Initialization and Rendering using Leaflet & OpenStreetMap
 const renderMapLocations = (map, locations) => {
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Marker) {
+      map.removeLayer(layer);
+    }
+  });
   const resultsRoot = document.querySelector(".results-panel");
 
-  if (resultsRoot) {
-    resultsRoot.replaceChildren();
+  const renderLocationList = (markerByLocation) => {
+    if (!resultsRoot) {
+      return;
+    }
 
-    const heading = document.createElement("div");
-    heading.className = "section-heading compact";
-    heading.innerHTML = '<div><p class="eyebrow">Nearby</p><h2>Venues and events</h2></div>';
-    resultsRoot.append(heading);
+    resultsRoot.replaceChildren();
+    appendLocationHeading(resultsRoot, "Nearby", "Venues and events");
 
     if (!locations.length) {
       const empty = document.createElement("p");
       empty.className = "venue-item";
-      empty.innerHTML = "<div><h3>No venues found</h3><p>Try again later.</p></div>";
+      empty.textContent = "No venues found. Try again later.";
       resultsRoot.append(empty);
+      return;
     }
-  }
 
-  locations.forEach((loc) => {
-    // Add Marker to Leaflet Map
-    const marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
-
-    // Bind description popup
-    const sportsText = loc.sports ? `<br><strong>Sports:</strong> ${loc.sports}` : "";
-    const popupContent = `
-      <div style="font-family: inherit; color: var(--ink);">
-        <strong style="font-size: 1.1rem; display: block; margin-bottom: 0.2rem;">${loc.name}</strong>
-        <span style="color: var(--muted); font-size: 0.9rem;">${loc.address}</span><br>
-        <span style="font-size: 0.9rem;">Area: <strong>${loc.area}</strong></span>
-        ${sportsText}
-      </div>
-    `;
-    marker.bindPopup(popupContent);
-
-    // Render in Sidebar
-    if (resultsRoot) {
+    locations.forEach((loc) => {
+      const marker = markerByLocation.get(String(loc.id));
       const article = document.createElement("article");
+      const body = document.createElement("div");
+      const title = document.createElement("h3");
+      const sports = document.createElement("p");
+      const count = document.createElement("span");
+
       article.className = "venue-item";
-      article.style.cursor = "pointer";
+      article.tabIndex = 0;
+      article.setAttribute("role", "button");
 
-      article.innerHTML = `
-        <div>
-          <h3>${loc.name}</h3>
-          <p>${loc.sports || "No sports registered"}</p>
-        </div>
-        <span>${loc.activeEventsCount} events</span>
-      `;
+      title.textContent = loc.name;
+      sports.textContent = loc.sports || "No sports registered";
+      count.textContent = `${loc.activeEventsCount || 0} events`;
 
-      // Focus map and open popup on click
-      article.addEventListener("click", () => {
+      body.append(title, sports);
+      article.append(body, count);
+
+      const openLocation = () => {
         map.setView([loc.latitude, loc.longitude], 15);
-        marker.openPopup();
+        if (marker) {
+          marker.openPopup();
+        }
+        renderLocationDetails(loc, marker, markerByLocation);
+      };
+
+      article.addEventListener("click", openLocation);
+      article.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openLocation();
+        }
       });
 
       resultsRoot.append(article);
+    });
+  };
+
+  const renderLocationDetails = async (location, marker, markerByLocation) => {
+    if (!resultsRoot) {
+      return;
     }
+
+    resultsRoot.replaceChildren();
+
+    const backButton = document.createElement("button");
+    backButton.className = "icon-button";
+    backButton.type = "button";
+    backButton.setAttribute("aria-label", "Back to locations");
+    backButton.textContent = "←";
+    backButton.addEventListener("click", () => renderLocationList(markerByLocation));
+    appendLocationHeading(resultsRoot, location.area || "Iasi", location.name, backButton);
+
+    const summary = document.createElement("div");
+    const sports = document.createElement("p");
+    const address = document.createElement("p");
+    const subscribeMessage = document.createElement("p");
+
+    summary.className = "venue-summary";
+    sports.textContent = location.sports || "No sports registered";
+    address.textContent = location.address || "Address pending";
+    subscribeMessage.className = "venue-subscribe-message";
+    summary.append(sports, address);
+
+    const actions = document.createElement("div");
+    actions.className = "venue-actions";
+
+    if (authState.token) {
+      const subscribeButton = document.createElement("button");
+      subscribeButton.className = "btn btn-secondary venue-subscribe";
+      subscribeButton.type = "button";
+      subscribeButton.textContent = location.subscribed ? "Unsubscribe" : "Subscribe";
+
+      subscribeButton.addEventListener("click", async () => {
+        subscribeButton.disabled = true;
+        subscribeMessage.textContent = "";
+
+        try {
+          const method = location.subscribed ? "DELETE" : "POST";
+          const payload = await apiRequest("backend/public/location-subscription.php", {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ location_id: location.id })
+          });
+
+          location.subscribed = Boolean(payload.subscribed);
+          subscribeButton.textContent = location.subscribed ? "Unsubscribe" : "Subscribe";
+          subscribeMessage.textContent = payload.message;
+        } catch (error) {
+          subscribeMessage.textContent = error.message || "Subscription could not be changed.";
+        } finally {
+          subscribeButton.disabled = false;
+        }
+      });
+
+      actions.append(subscribeButton);
+    } else {
+      const loginLink = document.createElement("a");
+      loginLink.className = "btn btn-secondary venue-subscribe";
+      loginLink.href = "login.html";
+      loginLink.textContent = "Login to subscribe";
+      actions.append(loginLink);
+    }
+
+    summary.append(actions, subscribeMessage);
+    resultsRoot.append(summary);
+
+    const list = document.createElement("div");
+    list.className = "venue-events";
+    const loading = document.createElement("p");
+    loading.className = "venue-empty";
+    loading.textContent = "Loading events...";
+    list.append(loading);
+    resultsRoot.append(list);
+
+    if (marker) {
+      marker.openPopup();
+    }
+
+    try {
+      const payload = await apiRequest(`backend/public/events.php?location_id=${encodeURIComponent(location.id)}`);
+      list.replaceChildren();
+
+      if (!payload.events.length) {
+        const empty = document.createElement("p");
+        empty.className = "venue-empty";
+        empty.textContent = "0 events at this location.";
+        list.append(empty);
+        return;
+      }
+
+      payload.events.forEach((eventItem) => {
+        list.append(renderLocationEventItem(eventItem));
+      });
+    } catch (error) {
+      list.replaceChildren();
+      const empty = document.createElement("p");
+      empty.className = "venue-empty";
+      empty.textContent = "Events could not be loaded.";
+      list.append(empty);
+    }
+  };
+
+  const markerByLocation = new Map();
+
+  locations.forEach((loc) => {
+    if (!loc.latitude || !loc.longitude) {
+      return;
+    }
+
+    const marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
+
+    marker.bindPopup(buildLocationPopup(loc));
+    marker.on("click", () => {
+      renderLocationDetails(loc, marker, markerByLocation);
+    });
+
+    markerByLocation.set(String(loc.id), marker);
   });
+
+  renderLocationList(markerByLocation);
 };
 
 const initializeSearchMap = async () => {
@@ -1096,12 +1288,56 @@ const initializeSearchMap = async () => {
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   });
 
-  try {
-    const payload = await apiRequest("backend/public/locations.php");
-    renderMapLocations(map, payload.locations || []);
-  } catch (error) {
-    console.error("Could not load map locations:", error);
-  }
+  // Funcția care citește toate filtrele și reface harta
+  const fetchFilteredLocations = async () => {
+    const params = new URLSearchParams();
+    
+    const qInput = document.querySelector('#search-query');
+    if (qInput && qInput.value) params.append('q', qInput.value);
+
+    const sportSelect = document.querySelector('.advanced-grid [name="sport"]');
+    const activeChip = document.querySelector('.filter-chips .chip.active');
+    
+    if (activeChip && activeChip.textContent !== 'All') {
+      params.append('sport', activeChip.textContent);
+    } else if (sportSelect && sportSelect.value !== 'Any sport') {
+      params.append('sport', sportSelect.value);
+    }
+
+    const areaSelect = document.querySelector('.advanced-grid [name="area"]');
+    if (areaSelect && areaSelect.value !== 'All of Iasi') {
+      params.append('area', areaSelect.value);
+    }
+
+    try {
+      const payload = await apiRequest(`backend/public/locations.php?${params.toString()}`);
+      renderMapLocations(map, payload.locations || []);
+    } catch (error) {
+      console.error("Could not load map locations:", error);
+    }
+  };
+
+  // 1. Încărcarea inițială
+  await fetchFilteredLocations();
+
+  // 2. Ascultători pentru formulare
+  document.querySelector('.search-box')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fetchFilteredLocations();
+  });
+
+  document.querySelector('.advanced-grid')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fetchFilteredLocations();
+  });
+
+  // 3. Ascultători pentru cipurile rapide (Football, Tennis, etc)
+  document.querySelectorAll('.filter-chips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      // Un timeout scurt ca să lăsăm codul principal de UI să seteze clasa "active" mai întâi
+      setTimeout(fetchFilteredLocations, 0);
+    });
+  });
 };
 
 loadEventsList();

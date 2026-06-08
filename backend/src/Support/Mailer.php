@@ -7,20 +7,23 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 final class Mailer
 {
-    public function send(string $to, string $subject, string $body): void
+    public function send(string $to, string $subject, string $body): bool
     {
         $this->writeLocalCopy($to, $subject, $body);
 
         $config = $this->smtpConfig();
 
         if (!$this->isSmtpConfigured($config)) {
-            return;
+            $this->writeMailError($to, $subject, 'SMTP is not configured. The link was written to mail.log only.');
+            return false;
         }
 
         try {
             $this->sendViaSmtp($to, $subject, $body, $config);
+            return true;
         } catch (MailException $exception) {
             $this->writeMailError($to, $subject, $exception->getMessage());
+            return false;
         }
     }
 

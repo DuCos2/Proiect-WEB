@@ -10,6 +10,15 @@ use App\Support\Request;
 
 $pdo = Database::connection();
 $controller = new LocationController(new Location($pdo), new User($pdo));
+$method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+$payload = Request::jsonBody();
 
-Request::requireMethod('GET');
-$controller->index();
+if ($method === 'POST') {
+    $controller->subscribe($payload);
+}
+
+if ($method === 'DELETE') {
+    $controller->unsubscribe($payload);
+}
+
+Request::requireMethod('POST');

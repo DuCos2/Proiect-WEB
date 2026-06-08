@@ -170,6 +170,12 @@ svg {
   border-color: rgba(22, 127, 122, 0.4);
 }
 
+.btn-secondary {
+  color: var(--primary-dark);
+  background: var(--surface-soft);
+  border-color: var(--line);
+}
+
 .nav-toggle {
   display: none;
   justify-self: end;
@@ -733,6 +739,83 @@ main {
   white-space: nowrap;
 }
 
+.map-popup {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.map-popup strong {
+  font-size: 1rem;
+}
+
+.map-popup span {
+  color: var(--muted);
+}
+
+.venue-summary {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.venue-summary p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.venue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.venue-subscribe {
+  width: fit-content;
+}
+
+.venue-subscribe-message {
+  min-height: 1.25rem;
+  font-weight: 800;
+}
+
+.venue-events {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.venue-event {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.venue-event h3,
+.venue-event p,
+.venue-empty {
+  margin: 0;
+}
+
+.venue-event p,
+.venue-empty {
+  color: var(--muted);
+}
+
+.venue-event-link {
+  color: var(--primary-dark);
+  font-weight: 900;
+}
+
 .advanced-search details {
   padding: 1rem;
 }
@@ -1214,6 +1297,12 @@ main {
 
   .map-toolbar,
   .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .venue-item,
+  .venue-event {
     align-items: flex-start;
     flex-direction: column;
   }

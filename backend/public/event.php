@@ -4,8 +4,10 @@ require_once __DIR__ . '/../bootstrap.php';
 
 use App\Controllers\EventController;
 use App\Models\Event;
+use App\Models\Location;
 use App\Models\User;
 use App\Support\Database;
+use App\Support\Mailer;
 use App\Support\Response;
 
 $id = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);
@@ -15,7 +17,7 @@ if ($id === false || $id === null) {
 }
 
 $pdo = Database::connection();
-$controller = new EventController(new Event($pdo), new User($pdo));
+$controller = new EventController(new Event($pdo), new User($pdo), new Location($pdo), new Mailer());
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 if ($method === 'DELETE') {

@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Models\User;
 use App\Support\Auth;
-use App\Support\Csrf;
 use App\Support\Mailer;
 use App\Support\Request;
 use App\Support\Response;
@@ -22,8 +21,6 @@ final class UserController
 
     public function register(array $payload): void
     {
-        $this->verifyCsrf();
-
         $username = $this->cleanName($payload['username'] ?? '');
         $email = $this->cleanEmail($payload['email'] ?? '');
         $password = (string) ($payload['password'] ?? '');
@@ -70,8 +67,9 @@ final class UserController
         }
 
         try {
-            $this->sendVerificationEmail($user);
-            $message = 'Account created. Check your email to verify the account.';
+            $message = $this->sendVerificationEmail($user)
+                ? 'Account created. Check your email to verify the account.'
+                : 'Account created. Verification link was saved locally because SMTP is not configured.';
         } catch (\Throwable $exception) {
             $message = 'Account created.';
         }
@@ -83,8 +81,6 @@ final class UserController
 
     public function login(array $payload): void
     {
-        $this->verifyCsrf();
-
         $email = $this->cleanEmail($payload['email'] ?? '');
         $password = (string) ($payload['password'] ?? '');
 
@@ -140,7 +136,6 @@ final class UserController
 
     public function logout(): void
     {
-        $this->verifyCsrf();
         $token = Request::bearerToken();
 
         if ($token !== null && $this->users instanceof User) {
@@ -152,8 +147,6 @@ final class UserController
 
     public function requestPasswordReset(array $payload): void
     {
-        $this->verifyCsrf();
-
         $email = $this->cleanEmail($payload['email'] ?? '');
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -180,8 +173,6 @@ final class UserController
 
     public function resetPassword(array $payload): void
     {
-        $this->verifyCsrf();
-
         $token = trim((string) ($payload['token'] ?? ''));
         $password = (string) ($payload['password'] ?? '');
         $errors = [];
@@ -215,8 +206,6 @@ final class UserController
 
     public function verifyEmail(array $payload): void
     {
-        $this->verifyCsrf();
-
         $token = trim((string) ($payload['token'] ?? ''));
 
         if ($token === '') {
@@ -237,8 +226,6 @@ final class UserController
 
     public function resendVerification(array $payload): void
     {
-        $this->verifyCsrf();
-
         $email = $this->cleanEmail($payload['email'] ?? '');
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -252,13 +239,6 @@ final class UserController
         }
 
         Response::json(['message' => 'If that account exists, a verification link was sent.']);
-    }
-
-    private function verifyCsrf(): void
-    {
-        if (!Csrf::isValid(Request::csrfToken())) {
-            Response::json(['message' => 'Your session expired. Refresh the page and try again.'], 419);
-        }
     }
 
     private function validateRegistration(string $username, string $email, string $password): array
@@ -357,13 +337,13 @@ final class UserController
         return $this->mailer;
     }
 
-    private function sendVerificationEmail(array $user): void
+    private function sendVerificationEmail(array $user): bool
     {
         $token = $this->newToken();
         $this->requireUsers()->createEmailVerification((int) $user['id'], $this->tokenHash($token));
 
         $link = Url::appUrl('verify-email.html?token=' . urlencode($token));
-        $this->requireMailer()->send(
+        return $this->requireMailer()->send(
             $user['email'],
             'Verify your Local Greetings email',
             "Hello {$user['username']},\n\nUse this link to verify your account:\n{$link}\n\nThe link expires in 24 hours."

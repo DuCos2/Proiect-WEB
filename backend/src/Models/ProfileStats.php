@@ -32,11 +32,26 @@ final class ProfileStats
                 'favoriteSport' => $this->topLabel($events, 'sport'),
                 'favoriteArea' => $this->topLabel($events, 'zone'),
                 'level' => $this->topLabel($events, 'skill_level'),
+                'upcomingEvents' => $upcomingEvents,
+            'subscriptions' => $this->subscriptions($userId),
             ],
             'upcomingEvents' => $upcomingEvents,
         ];
     }
+private function subscriptions(int $userId): array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT locations.id, locations.name, locations.area 
+             FROM user_subscriptions 
+             JOIN locations ON locations.id = user_subscriptions.location_id 
+             WHERE user_subscriptions.user_id = :user_id 
+               AND user_subscriptions.city_id IS NULL 
+               AND user_subscriptions.sport_id IS NULL'
+        );
+        $statement->execute(['user_id' => $userId]);
 
+        return $statement->fetchAll();
+    }
     private function participatedEvents(int $userId): array
     {
         $zoneExpression = $this->zoneExpression();

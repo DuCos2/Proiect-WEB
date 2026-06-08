@@ -44,22 +44,22 @@
       <p class="eyebrow">Search</p>
       <h1>Search for venues, courts, and events near them.</h1>
     </div>
-    <form class="search-box" action="#" method="get">
-      <label class="sr-only" for="search-query">Search location</label>
-      <input id="search-query" type="search" placeholder="Ex: Copou, Palas, football, basketball">
-      <button class="btn btn-primary" type="submit">Search</button>
-    </form>
   </section>
 
   <section class="map-layout" aria-label="Map search">
     <div class="map-panel">
       <div class="map-toolbar">
-        <div class="filter-chips" aria-label="Quick filters">
-          <button class="chip active" type="button">All</button>
-          <button class="chip" type="button">Football</button>
-          <button class="chip" type="button">Basketball</button>
-          <button class="chip" type="button">Tennis</button>
-        </div>
+      <div class="filter-chips" aria-label="Quick filters">
+        <button class="chip active" type="button">All</button>
+        <button class="chip" type="button">Football</button>
+        <button class="chip" type="button">Basketball</button>
+        <button class="chip" type="button">Tennis</button>
+        <button class="chip" type="button">Volleyball</button>
+        <button class="chip" type="button">Running</button>
+        <button class="chip" type="button">Cycling</button>
+        <button class="chip" type="button">Badminton</button>
+        <button class="chip" type="button">Table Tennis</button>
+      </div>
         <button class="icon-button" type="button" aria-label="My location">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4Zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1A9 9 0 0 0 11 20.9V23h2v-2.1A9 9 0 0 0 20.9 13H23v-2ZM12 19a7 7 0 1 1 7-7 7 7 0 0 1-7 7Z"></path></svg>
         </button>
@@ -102,30 +102,36 @@
   <section class="advanced-search">
     <details open>
       <summary>Advanced search</summary>
-      <form class="advanced-grid" action="#" method="get">
-        <label>
-          Sport
-          <select>
-            <option>Any sport</option>
-            <option>Football</option>
-            <option>Basketball</option>
-            <option>Tennis</option>
-            <option>Volleyball</option>
-          </select>
-        </label>
-        <label>
-          Area
-          <select>
-            <option>All of Iasi</option>
-            <option>Copou</option>
-            <option>Palas</option>
-            <option>Tatarasi</option>
-            <option>Ciric</option>
-          </select>
-        </label>
+<form class="advanced-grid" action="#" method="get">
+  <label>
+    Sport
+    <select name="sport">
+      <option>Any sport</option>
+      <option>Football</option>
+      <option>Basketball</option>
+      <option>Tennis</option>
+      <option>Volleyball</option>
+      <option>Running</option>
+      <option>Cycling</option>
+      <option>Badminton</option>
+      <option>Table Tennis</option>
+    </select>
+  </label>
+  <label>
+    Area
+    <select name="area">
+      <option>All of Iasi</option>
+      <option>Copou</option>
+      <option>Palas</option>
+      <option>Ciric</option>
+      <option>Podu Ros</option>
+      <option>Pacurari</option>
+      <option>Centru</option>
+    </select>
+  </label>
         <label>
           Date
-          <input type="date">
+          <input type="date" name="date">
         </label>
         <label>
           Level

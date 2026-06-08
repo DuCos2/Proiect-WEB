@@ -38,9 +38,15 @@ final class Request
             if (strtolower((string) $name) === 'authorization') {
                 return self::parseBearerToken((string) $value);
             }
+
+            if (strtolower((string) $name) === 'x-auth-token') {
+                return trim((string) $value) ?: null;
+            }
         }
 
-        return self::parseBearerToken($_SERVER['HTTP_AUTHORIZATION'] ?? '');
+        return self::parseBearerToken($_SERVER['HTTP_AUTHORIZATION'] ?? '')
+            ?? self::parseBearerToken($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '')
+            ?? (trim((string) ($_SERVER['HTTP_X_AUTH_TOKEN'] ?? '')) ?: null);
     }
 
     private static function parseBearerToken(string $header): ?string

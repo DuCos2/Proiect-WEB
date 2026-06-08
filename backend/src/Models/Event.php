@@ -11,14 +11,22 @@ final class Event
     {
     }
 
-    public function all(?int $userId = null): array
+    public function all(?int $userId = null, ?int $locationId = null): array
     {
+        $where = ['(events.status IS NULL OR events.status = "open")'];
+        $params = [];
+
+        if ($locationId !== null) {
+            $where[] = 'events.location_id = :location_id';
+            $params['location_id'] = $locationId;
+        }
+
         $statement = $this->pdo->prepare($this->baseSelect() . '
-            WHERE events.status IS NULL OR events.status = "open"
+            WHERE ' . implode(' AND ', $where) . '
             ORDER BY events.event_date ASC, events.created_at DESC
             LIMIT 30
         ');
-        $statement->execute();
+        $statement->execute($params);
 
         return array_map(
             fn (array $event): array => $this->present($event, $userId),
@@ -172,6 +180,7 @@ final class Event
                 events.status,
                 events.created_at,
                 events.organizer_id,
+                events.location_id,
                 sports.name AS sport_name,
                 locations.name AS location_name,
                 locations.area AS location_area,
@@ -217,6 +226,7 @@ final class Event
             'participants' => $this->participants((int) $event['id']),
             'sport' => $event['sport_name'] ?? 'Sport',
             'location' => [
+                'id' => isset($event['location_id']) ? (int) $event['location_id'] : null,
                 'name' => $event['location_name'] ?? 'Location pending',
                 'area' => $event['location_area'] ?? 'Iasi',
                 'address' => $event['location_address'] ?? '',
