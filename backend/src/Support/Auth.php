@@ -11,7 +11,11 @@ final class Auth
         $token = Request::bearerToken();
 
         if ($token !== null && $users instanceof User) {
-            return $users->findByAuthTokenHash(self::tokenHash($token));
+            $user = $users->findByAuthTokenHash(self::tokenHash($token));
+            if ($user !== null && (bool) $user['is_banned']) {
+                return null;
+            }
+            return $user;
         }
 
         return null;

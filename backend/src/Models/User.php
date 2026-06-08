@@ -23,21 +23,34 @@ final class User
 
     public function create(string $username, string $email, string $passwordHash): array
     {
+        // Load admin configuration
+        $adminConfigPath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'admin.php';
+        $adminEmail = 'log70302@gmail.com'; // fallback
+        if (file_exists($adminConfigPath)) {
+            $config = require $adminConfigPath;
+            if (is_array($config) && isset($config['admin_email'])) {
+                $adminEmail = $config['admin_email'];
+            }
+        }
+
+        $role = (strtolower($email) === strtolower($adminEmail)) ? 'admin' : 'user';
+
         $statement = $this->pdo->prepare(
             'INSERT INTO users (username, email, password_hash, role, is_banned, created_at)
-             VALUES (:username, :email, :password_hash, "user", 0, NOW())'
+             VALUES (:username, :email, :password_hash, :role, 0, NOW())'
         );
         $statement->execute([
             'username' => $username,
             'email' => $email,
             'password_hash' => $passwordHash,
+            'role' => $role,
         ]);
 
         return [
             'id' => (int) $this->pdo->lastInsertId(),
             'username' => $username,
             'email' => $email,
-            'role' => 'user',
+            'role' => $role,
             'is_banned' => 0,
             'email_verified_at' => null,
         ];
@@ -107,9 +120,9 @@ final class User
             'INSERT INTO login_attempts (email, attempt_count, locked_until)
              VALUES (:email, :attempt_count, :locked_until)
              ON DUPLICATE KEY UPDATE
-                attempt_count = VALUES(attempt_count),
-                locked_until = VALUES(locked_until),
-                updated_at = NOW()'
+                 attempt_count = VALUES(attempt_count),
+                 locked_until = VALUES(locked_until),
+                 updated_at = NOW()'
         );
         $statement->execute([
             'email' => $email,
@@ -205,5 +218,36 @@ final class User
     {
         $statement = $this->pdo->prepare('DELETE FROM email_verifications WHERE user_id = :user_id');
         $statement->execute(['user_id' => $userId]);
+    }
+
+    public function all(): array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT id, username, email, role, is_banned, created_at FROM users ORDER BY created_at DESC'
+        );
+        $statement->execute();
+        return $statement->fetchAll();
+    }
+
+    public function toggleBan(int $id): bool
+    {
+        $statement = $this->pdo->prepare('SELECT is_banned FROM users WHERE id = :id LIMIT 1');
+        $statement->execute(['id' => $id]);
+        $isBanned = (bool) $statement->fetchColumn();
+
+        $newStatus = !$isBanned;
+
+        $statement = $this->pdo->prepare('UPDATE users SET is_banned = :is_banned WHERE id = :id');
+        $statement->execute([
+            'is_banned' => $newStatus ? 1 : 0,
+            'id' => $id
+        ]);
+
+        if ($newStatus === true) {
+            $statement = $this->pdo->prepare('UPDATE auth_tokens SET revoked_at = NOW() WHERE user_id = :user_id');
+            $statement->execute(['user_id' => $id]);
+        }
+
+        return $newStatus;
     }
 }
