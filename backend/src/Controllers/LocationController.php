@@ -41,7 +41,7 @@ public function index(): void
         ];
 
         Response::json([
-            'locations' => $this->locations->advancedSearch($user !== null ? (int) $user['id'] : null, $filters),
+            'locations' => $this->locations->advancedFilteredLocations($user !== null ? (int) $user['id'] : null, $filters),
         ]);
     }
 

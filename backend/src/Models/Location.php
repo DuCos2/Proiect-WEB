@@ -59,7 +59,7 @@ public function all(?int $userId = null, array $filters = []): array
             FROM locations
             LEFT JOIN location_sports ON location_sports.location_id = locations.id
             LEFT JOIN sports ON sports.id = location_sports.sport_id
-            LEFT JOIN events ON events.location_id = locations.id AND (events.status = 'open' OR events.status IS NULL) AND (events.event_date >= NOW() OR events.event_date IS NULL)
+            LEFT JOIN events ON events.location_id = locations.id AND (events.status = 'open' OR events.status IS NULL) AND (events.end_date >= NOW() OR events.end_date IS NULL)
             WHERE {$whereSql}
             GROUP BY locations.id
             ORDER BY locations.name ASC
@@ -154,7 +154,7 @@ public function all(?int $userId = null, array $filters = []): array
         return $statement->fetchAll();
     }
 
-    public function advancedSearch(?int $userId = null, array $filters = []): array
+    public function advancedFilteredLocations(?int $userId = null, array $filters = []): array
     {
         $whereConditions = ['1=1'];
         $params = [
@@ -165,7 +165,7 @@ public function all(?int $userId = null, array $filters = []): array
         $eventConditions = ['events.location_id = locations.id'];
 
         // Must have an ongoing event that can be registered for
-        $eventConditions[] = "(events.event_date >= NOW() OR events.event_date IS NULL)";
+        $eventConditions[] = "(events.end_date >= NOW() OR events.end_date IS NULL)";
 
         if (!empty($filters['sport']) && $filters['sport'] !== 'Any sport') {
             $eventConditions[] = 'EXISTS (SELECT 1 FROM sports WHERE sports.id = events.sport_id AND sports.name = :event_sport)';
@@ -221,7 +221,7 @@ public function all(?int $userId = null, array $filters = []): array
             FROM locations
             LEFT JOIN location_sports ON location_sports.location_id = locations.id
             LEFT JOIN sports ON sports.id = location_sports.sport_id
-            LEFT JOIN events ON events.location_id = locations.id AND (events.status = 'open' OR events.status IS NULL) AND (events.event_date >= NOW() OR events.event_date IS NULL)
+            LEFT JOIN events ON events.location_id = locations.id AND (events.status = 'open' OR events.status IS NULL) AND (events.end_date >= NOW() OR events.end_date IS NULL)
             WHERE {$whereSql}
             GROUP BY locations.id
             ORDER BY locations.name ASC

@@ -13,7 +13,10 @@ final class Event
 
     public function all(?int $userId = null, ?int $locationId = null): array
     {
-        $where = ['(events.status IS NULL OR events.status = "open")'];
+        $where = [
+            '(events.status IS NULL OR events.status = "open")',
+            '(events.end_date >= NOW() OR events.end_date IS NULL)'
+        ];
         $params = [];
 
         if ($locationId !== null) {

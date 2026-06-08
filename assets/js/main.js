@@ -820,8 +820,12 @@ const renderEventPlan = (eventItem) => {
 
   planList.replaceChildren();
 
+  const startTime = eventTimeLabel(eventItem.eventDate);
+  const endTime = eventItem.endDate ? eventTimeLabel(eventItem.endDate) : null;
+  const meetTime = endTime ? `${startTime} - ${endTime}` : startTime;
+
   [
-    ["Meet", `${eventTimeLabel(eventItem.eventDate)} at ${eventItem.location.name}`],
+    ["Meet", `${meetTime} at ${eventItem.location.name}`],
     ["Sport", eventItem.sport],
     ["Group", `${eventItem.participantCount}/${eventItem.maxParticipants || "open"} registered`],
     ["Status", eventItem.isFull ? "Full" : "Registration open"]
@@ -993,8 +997,16 @@ const updateEventDetails = (eventItem) => {
   setPageText("#detail-sport", eventItem.sport);
   setPageText("#detail-title", eventItem.title);
   setPageText("#detail-description", eventItem.description);
-  setPageText("#detail-date", eventDateLabel(eventItem.eventDate));
-  setPageText("#detail-time", eventTimeLabel(eventItem.eventDate));
+  const startDate = eventDateLabel(eventItem.eventDate);
+  const endDate = eventItem.endDate ? eventDateLabel(eventItem.endDate) : null;
+  const dateText = (endDate && endDate !== startDate) ? `${startDate} to ${endDate}` : startDate;
+  
+  const startTime = eventTimeLabel(eventItem.eventDate);
+  const endTime = eventItem.endDate ? eventTimeLabel(eventItem.endDate) : null;
+  const timeText = endTime ? `${startTime} - ${endTime}` : startTime;
+
+  setPageText("#detail-date", dateText);
+  setPageText("#detail-time", timeText);
   setPageText("#detail-spots", eventSpotsLabel(eventItem));
   setPageText("#detail-badge", eventItem.sport);
   setPageText("#detail-location", `${eventItem.location.name}, ${eventItem.location.area}`);
