@@ -28,6 +28,23 @@ public function index(): void
         ]);
     }
 
+    public function advanced(): void
+    {
+        $user = $this->users !== null ? Auth::user($this->users) : null;
+        
+        $filters = [
+            'sport' => $_GET['sport'] ?? null,
+            'area' => $_GET['area'] ?? null,
+            'date' => $_GET['date'] ?? null,
+            'level' => $_GET['level'] ?? null,
+            'min_spots' => $_GET['min_spots'] ?? null,
+        ];
+
+        Response::json([
+            'locations' => $this->locations->advancedSearch($user !== null ? (int) $user['id'] : null, $filters),
+        ]);
+    }
+
     public function subscribe(array $payload): void
     {
         $user = $this->users !== null ? Auth::user($this->users) : null;

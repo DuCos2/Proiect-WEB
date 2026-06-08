@@ -349,20 +349,21 @@ const renderProfileStats = (profileStats) => {
     if (Object.prototype.hasOwnProperty.call(profileStats, statName)) {
       element.textContent = profileStats[statName];
     }
-    const subscriptionsRoot = document.querySelector("[data-subscriptions]");
+  });
+
+  const subscriptionsRoot = document.querySelector("[data-subscriptions]");
 
   if (subscriptionsRoot) {
     subscriptionsRoot.replaceChildren();
 
-    if (!profileStats.subscriptions || !profileStats.subscriptions.length) {
+    if (!profileStats.preferences.subscriptions || !profileStats.preferences.subscriptions.length) {
       appendListItem(subscriptionsRoot, "No subscriptions yet", "");
     } else {
-      profileStats.subscriptions.forEach((sub) => {
+      profileStats.preferences.subscriptions.forEach((sub) => {
         appendListItem(subscriptionsRoot, sub.name, sub.area);
       });
     }
   }
-  });
 
   const sportMixRoot = document.querySelector("[data-sport-mix]");
 
@@ -488,10 +489,10 @@ const eventDateLabel = (eventDate) => {
     return "Date pending";
   }
 
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric"
-  }).format(parsedDate);
+  const dd = String(parsedDate.getDate()).padStart(2, '0');
+  const mm = String(parsedDate.getMonth() + 1).padStart(2, '0');
+  const yyyy = parsedDate.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 };
 
 const eventTimeLabel = (eventDate) => {
@@ -672,16 +673,30 @@ const initializeCreateEventForm = async () => {
   form.hidden = false;
 
   const dateInput = form.querySelector('input[name="event_date"]');
+  const endDateInput = form.querySelector('input[name="end_date"]');
+  
   if (dateInput) {
     const now = new Date();
     const tzOffset = now.getTimezoneOffset() * 60000;
     const localISOTime = new Date(now - tzOffset).toISOString().slice(0, 16);
     dateInput.min = localISOTime;
+    if (endDateInput) {
+      endDateInput.min = localISOTime;
+      
+      dateInput.addEventListener('change', () => {
+        if (dateInput.value) {
+          endDateInput.min = dateInput.value;
+          if (endDateInput.value && endDateInput.value < dateInput.value) {
+            endDateInput.value = dateInput.value;
+          }
+        }
+      });
+    }
   }
 
   const locationSelect = form.querySelector('select[name="location"]');
   const sportSelect = form.querySelector('select[name="sport"]');
-  const areaSelect = form.querySelector('select[name="area"]');
+  const areaSelect = form.querySelector('[name="area"]');
   let locationsList = [];
 
   if (locationSelect && sportSelect) {
@@ -752,6 +767,7 @@ const initializeCreateEventForm = async () => {
     }
     payload.skill_level = skillLevelString;
     delete payload.skill_levels;
+
 
     setFormErrors(form);
     setEventFormMessage(form, "Saving event...");
@@ -1288,19 +1304,32 @@ const initializeSearchMap = async () => {
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   });
 
-  // Funcția care citește toate filtrele și reface harta
+  // Funcția care citește filtrele normale și reface harta
   const fetchFilteredLocations = async () => {
     const params = new URLSearchParams();
     
     const qInput = document.querySelector('#search-query');
     if (qInput && qInput.value) params.append('q', qInput.value);
 
-    const sportSelect = document.querySelector('.advanced-grid [name="sport"]');
     const activeChip = document.querySelector('.filter-chips .chip.active');
     
     if (activeChip && activeChip.textContent !== 'All') {
       params.append('sport', activeChip.textContent);
-    } else if (sportSelect && sportSelect.value !== 'Any sport') {
+    }
+
+    try {
+      const payload = await apiRequest(`backend/public/locations.php?${params.toString()}`);
+      renderMapLocations(map, payload.locations || []);
+    } catch (error) {
+      console.error("Could not load map locations:", error);
+    }
+  };
+
+  const fetchAdvancedLocations = async () => {
+    const params = new URLSearchParams();
+
+    const sportSelect = document.querySelector('.advanced-grid [name="sport"]');
+    if (sportSelect && sportSelect.value !== 'Any sport') {
       params.append('sport', sportSelect.value);
     }
 
@@ -1309,8 +1338,30 @@ const initializeSearchMap = async () => {
       params.append('area', areaSelect.value);
     }
 
+    const dateInput = document.querySelector('.advanced-grid [name="date"]');
+    if (dateInput && dateInput.value) {
+      const val = dateInput.value.trim();
+      const parts = val.split('/');
+      if (parts.length === 3) {
+        params.append('date', `${parts[2]}-${parts[1]}-${parts[0]}`);
+      } else {
+        params.append('date', val);
+      }
+    }
+
+    const levelSelect = document.querySelector('.advanced-grid [name="level"]');
+    if (levelSelect && levelSelect.value !== 'Any level') {
+      params.append('level', levelSelect.value);
+    }
+
+    const spotsInput = document.querySelector('.advanced-grid [name="min_spots"]');
+    if (spotsInput && spotsInput.value) {
+      params.append('min_spots', spotsInput.value);
+    }
+
+
     try {
-      const payload = await apiRequest(`backend/public/locations.php?${params.toString()}`);
+      const payload = await apiRequest(`backend/public/advanced-locations.php?${params.toString()}`);
       renderMapLocations(map, payload.locations || []);
     } catch (error) {
       console.error("Could not load map locations:", error);
@@ -1328,7 +1379,14 @@ const initializeSearchMap = async () => {
 
   document.querySelector('.advanced-grid')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    fetchFilteredLocations();
+    document.querySelectorAll('.filter-chips .chip').forEach(chip => {
+      if (chip.textContent === 'All') {
+        chip.classList.add('active');
+      } else {
+        chip.classList.remove('active');
+      }
+    });
+    fetchAdvancedLocations();
   });
 
   // 3. Ascultători pentru cipurile rapide (Football, Tennis, etc)

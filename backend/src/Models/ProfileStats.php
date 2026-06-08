@@ -67,7 +67,7 @@ private function subscriptions(int $userId): array
              LEFT JOIN sports ON sports.id = events.sport_id
              LEFT JOIN locations ON locations.id = events.location_id
              WHERE event_participants.user_id = :user_id
-               AND (events.event_date IS NULL OR events.event_date <= NOW())
+               AND (events.end_date IS NULL OR events.end_date <= NOW())
              ORDER BY events.event_date DESC"
         );
         $statement->execute(['user_id' => $userId]);
@@ -90,7 +90,7 @@ private function subscriptions(int $userId): array
              FROM events
              LEFT JOIN event_participants ON event_participants.event_id = events.id
              WHERE (event_participants.user_id = :participant_id OR events.organizer_id = :organizer_id)
-               AND events.event_date >= NOW()
+               AND events.end_date > NOW()
              ORDER BY events.event_date ASC
              LIMIT 3"
         );

@@ -59,6 +59,7 @@ final class Event
                 title,
                 description,
                 event_date,
+                end_date,
                 max_participants,
                 skill_level,
                 status,
@@ -70,6 +71,7 @@ final class Event
                 :title,
                 :description,
                 :event_date,
+                :end_date,
                 :max_participants,
                 :skill_level,
                 "open",
@@ -83,6 +85,7 @@ final class Event
             'title' => $payload['title'],
             'description' => $payload['description'],
             'event_date' => $payload['event_date'],
+            'end_date' => $payload['end_date'],
             'max_participants' => $payload['max_participants'],
             'skill_level' => $payload['skill_level'],
         ]);
@@ -128,7 +131,7 @@ final class Event
     {
         $errors = [];
 
-        foreach (['title', 'sport', 'location', 'area', 'event_date'] as $field) {
+        foreach (['title', 'sport', 'location', 'area', 'event_date', 'end_date'] as $field) {
             if ($this->cleanText($payload[$field] ?? '') === '') {
                 $errors[$field] = 'This field is required.';
             }
@@ -145,10 +148,18 @@ final class Event
         }
 
         $normalizedDate = $this->normalizeDate($payload['event_date'] ?? '');
+        $normalizedEndDate = $this->normalizeDate($payload['end_date'] ?? '');
+        
         if ($normalizedDate === null) {
-            $errors['event_date'] = 'Choose a valid date and time.';
+            $errors['event_date'] = 'Choose a valid start date and time.';
         } elseif (strtotime($normalizedDate) < time()) {
             $errors['event_date'] = 'The event date cannot be in the past.';
+        }
+
+        if ($normalizedEndDate === null) {
+            $errors['end_date'] = 'Choose a valid end date and time.';
+        } elseif ($normalizedDate !== null && strtotime($normalizedEndDate) <= strtotime($normalizedDate)) {
+            $errors['end_date'] = 'The end date must be after the start date.';
         }
 
         return $errors;
@@ -163,6 +174,7 @@ final class Event
             'area' => $this->cleanText($payload['area'] ?? ''),
             'description' => $this->cleanText($payload['description'] ?? ''),
             'event_date' => $this->normalizeDate($payload['event_date'] ?? ''),
+            'end_date' => $this->normalizeDate($payload['end_date'] ?? ''),
             'max_participants' => (int) ($payload['max_participants'] ?? 0),
             'skill_level' => $this->cleanText($payload['skill_level'] ?? 'Mixed level') ?: 'Mixed level',
         ];
@@ -175,6 +187,7 @@ final class Event
                 events.title,
                 events.description,
                 events.event_date,
+                events.end_date,
                 events.max_participants,
                 events.skill_level,
                 events.status,
@@ -214,6 +227,7 @@ final class Event
             'title' => $event['title'] ?? 'Untitled event',
             'description' => $event['description'] ?? '',
             'eventDate' => $event['event_date'],
+            'endDate' => $event['end_date'],
             'maxParticipants' => $maxParticipants,
             'participantCount' => $participantCount,
             'spotsLeft' => $spotsLeft,

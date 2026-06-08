@@ -111,45 +111,34 @@
           <input type="text" name="title" placeholder="Quick match in Copou" required>
         </label>
         <label>
-          Sport
-          <select name="sport" required disabled>
-            <option value="" disabled selected>First select the location...</option>
-          </select>
-        </label>
-        <label>
-          Date and time
-          <input type="datetime-local" name="event_date" required>
-        </label>
-        <label>
-          Max participants
-          <input type="number" name="max_participants" min="2" max="100" value="10" required>
-        </label>
-        <label>
           Location
           <select name="location" required>
             <option value="" disabled selected>Loading locations...</option>
           </select>
         </label>
         <label>
-          Area
-          <select name="area" required>
-            <option value="" disabled selected>Select an area...</option>
-            <option value="Centru">Centru</option>
-            <option value="Copou">Copou</option>
-            <option value="Tatarasi">Tătărași</option>
-            <option value="Pacurari">Păcurari</option>
-            <option value="Nicolina">Nicolina</option>
-            <option value="Alexandru">Alexandru cel Bun</option>
-            <option value="Gara">Gara</option>
-            <option value="Galata">Galata</option>
-            <option value="Ciric">Ciric</option>
-            <option value="Podu Ros">Podu Roș</option>
-            <option value="Cantemir">Cantemir</option>
-            <option value="CUG">CUG</option>
-            <option value="Dacia">Dacia</option>
-            <option value="Bucium">Bucium</option>
-            <option value="Palas">Palas</option>
+          Sport
+          <select name="sport" required disabled>
+            <option value="" disabled selected>First select the location...</option>
           </select>
+        </label>
+        <label>
+          Area
+          <input type="text" name="area" readonly placeholder="Select a location first..." required>
+        </label>
+        <div class="date-group" style="display: flex; flex-direction: column; gap: 1rem;">
+          <label style="flex: 1;">
+            Start date & time
+            <input type="datetime-local" name="event_date" required>
+          </label>
+          <label style="flex: 1;">
+            End date & time
+            <input type="datetime-local" name="end_date" required>
+          </label>
+        </div>
+        <label>
+          Max participants
+          <input type="number" name="max_participants" min="2" max="100" value="10" required>
         </label>
         <label class="event-form-wide">
           Level (select all that apply)

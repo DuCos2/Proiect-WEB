@@ -46,7 +46,7 @@
     </div>
   </section>
 
-  <section class="map-layout" aria-label="Map search">
+  <section class="map-layout" aria-label="Map search" style="align-items: start;">
     <div class="map-panel">
       <div class="map-toolbar">
       <div class="filter-chips" aria-label="Quick filters">
@@ -67,7 +67,7 @@
       <div id="map" style="height: 520px; border-radius: 8px; border: 1px solid var(--line); margin-top: 1rem; position: relative; z-index: 1;"></div>
     </div>
 
-    <aside class="results-panel" aria-label="Results near map">
+    <aside class="results-panel" aria-label="Results near map" style="height: 580px; overflow-y: scroll;">
       <div class="section-heading compact">
         <div>
           <p class="eyebrow">Nearby</p>
@@ -131,25 +131,22 @@
   </label>
         <label>
           Date
-          <input type="date" name="date">
+          <input type="text" name="date" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}">
         </label>
         <label>
           Level
-          <select>
+          <select name="level">
             <option>Any level</option>
             <option>Beginner</option>
             <option>Medium</option>
-            <option>Advanced</option>
+            <option>Expert</option>
           </select>
         </label>
         <label>
           Available spots
-          <input type="number" min="1" placeholder="Minimum">
+          <input type="number" name="min_spots" min="1" placeholder="Minimum">
         </label>
-        <label class="checkbox-field">
-          <input type="checkbox">
-          Only events with open registration
-        </label>
+
         <button class="btn btn-primary" type="submit">Apply filters</button>
       </form>
     </details>
