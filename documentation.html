@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation | Local Greetings</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/documentation.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral',
+      securityLevel: 'loose'
+    });
+  </script>
+</head>
+<body class="scholarly-body" prefix="schema: http://schema.org">
+
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="Local Greetings">
+    <img class="brand-logo" src="assets/images/app-logo.png" alt="Local Greetings Logo">
+    <span>
+        <strong>Local Greetings</strong>
+        <small>sports in Iasi</small>
+      </span>
+  </a>
+
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span class="sr-only">Menu</span>
+  </button>
+
+  <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+    <a href="index.html">Events</a>
+    <a href="search.html">Search</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="profile.html" class="profile-link" aria-label="Profile">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2.1-7 5v1h14v-1c0-2.9-3-5-7-5Z"></path>
+      </svg>
+      Profile
+    </a>
+    <a class="active" href="documentation.html">Documentation</a>
+  </nav>
+</header>
+
+<div class="doc-container">
+  <!-- Table of Contents Sidebar -->
+  <aside class="doc-sidebar" aria-label="Table of contents">
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="#abstract">Abstract</a></li>
+      <li>
+        <a href="#introduction">1. Introduction</a>
+        <ul>
+          <li><a href="#purpose">1.1 Purpose</a></li>
+          <li><a href="#conventions">1.2 Conventions</a></li>
+          <li><a href="#audience">1.3 Audience</a></li>
+          <li><a href="#product-scope">1.4 Scope</a></li>
+          <li><a href="#references">1.5 References</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#overall-description">2. Overall Description</a>
+        <ul>
+          <li><a href="#product-perspective">2.1 Perspective</a></li>
+          <li><a href="#product-functions">2.2 Functions</a></li>
+          <li><a href="#user-classes">2.3 User Classes</a></li>
+          <li><a href="#operating-environment">2.4 Environment</a></li>
+          <li><a href="#design-constraints">2.5 Constraints</a></li>
+          <li><a href="#user-documentation">2.6 User Docs</a></li>
+          <li><a href="#assumptions-dependencies">2.7 Assumptions</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#external-interfaces">3. External Interfaces</a>
+        <ul>
+          <li><a href="#user-interfaces">3.1 User Interfaces</a></li>
+          <li><a href="#hardware-interfaces">3.2 Hardware</a></li>
+          <li><a href="#software-interfaces">3.3 Software</a></li>
+          <li><a href="#comm-interfaces">3.4 Communications</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#system-features">4. System Features</a>
+        <ul>
+          <li><a href="#feature-auth">4.1 Authentication</a></li>
+          <li><a href="#feature-events">4.2 Event Management</a></li>
+          <li><a href="#feature-search">4.3 Search & Map</a></li>
+          <li><a href="#feature-admin">4.4 Admin Panel</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#nonfunctional-reqs">5. Nonfunctional Reqs</a>
+        <ul>
+          <li><a href="#performance">5.1 Performance</a></li>
+          <li><a href="#safety">5.2 Safety</a></li>
+          <li><a href="#security">5.3 Security</a></li>
+          <li><a href="#quality-attributes">5.4 Quality Attributes</a></li>
+          <li><a href="#business-rules">5.5 Business Rules</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#technical-architecture">6. Technical Details</a>
+        <ul>
+          <li><a href="#db-schema-details">6.1 Database Schema</a></li>
+          <li><a href="#autoloading-mvc">6.2 Autoloading & MVC</a></li>
+          <li><a href="#securing-data">6.3 Securing Data</a></li>
+        </ul>
+      </li>
+      <li><a href="#glossary">Appendix A: Glossary</a></li>
+      <li><a href="#analysis-models">Appendix B: Analysis Models</a></li>
+    </ul>
+  </aside>
+
+  <!-- Scholarly Article Main Content -->
+  <main class="scholarly-article" role="main">
+    <article>
+      <header>
+        <div class="banner">
+          <img src="assets/images/app-logo.png" alt="Local Greetings Logo" style="height: 50px;">
+          <div class="status">Project Specification</div>
+        </div>
+        <h1>Local Greetings</h1>
+        <p class="subtitle" style="font-size: 1.25rem; color: var(--muted-doc); margin-top: -0.5rem; margin-bottom: 2rem;">
+          Documetation for the project LoG
+        </p>
+
+        <div role="contentinfo" aria-label="Author and project details">
+          <dl>
+            <dt>Authors</dt>
+            <dd>Dubaca Cosmin &amp; Sichim Petru</dd>
+            <dt>Organization</dt>
+            <dd>Faculty of Computer Science, UAIC Iași</dd>
+          </dl>
+        </div>
+      </header>
+
+      <!-- Abstract Section -->
+      <section id="abstract" role="doc-abstract" typeof="sa:Abstract">
+        <h2>Abstract</h2>
+        <p>
+          This document serves as the Software Requirements Specification (SRS) for the <strong>Local Greetings</strong> 
+          web application. Local Greetings is a community-oriented sports platform that allows residents of Iași, Romania, 
+          to discover, organize, and participate in local sports activities and meetups. The platform connects athletes, 
+          casual players, and venues, providing an interactive map, advanced search filters, and moderation controls.
+        </p>
+        <p>
+          Unlike traditional social networks, Local Greetings focuses on real-time neighborhood coordination, utilizing 
+          an interactive map powered by OpenStreetMap and Leaflet.js, and a robust server-side architecture built with 
+          vanilla PHP 8.x, ensuring cross-platform speed and a low resource footprint. The specification described herein 
+          follows the structural guidelines of W3C Scholarly HTML for academic document representation and the functional 
+          definitions of the IEEE 830-1998 standards for software requirements.
+        </p>
+      </section>
+
+      <!-- Introduction Section -->
+      <section id="introduction" role="doc-introduction">
+        <h2>1. Introduction</h2>
+        
+        <section id="purpose">
+          <h3>1.1 Purpose</h3>
+          <p>
+            The purpose of this document is to define the software requirements for the Local Greetings web platform, 
+            version 1.0. This specification describes both functional and non-functional requirements, detailed use cases, 
+            architecture design, database schemas, and external interface descriptions to guide developers, testers, and evaluators.
+          </p>
+          <p>
+            The document covers the full scope of the platform, including user authentication, security, location 
+            subscriptions, event generation, search filters, geolocation mapping, and administrative moderation. It is intended 
+            to serve as a single source of truth for both technical grading and future system maintenance.
+          </p>
+        </section>
+
+        <section id="conventions">
+          <h3>1.2 Document Conventions</h3>
+          <p>
+            This document follows the standard structure of the IEEE 830-1998 Software Requirements Specification template 
+            while conforming to the W3C Scholarly HTML guidelines. Headings follow a strict hierarchical structure, 
+            and key components are styled with semantic visual indicators. Database column names and code variables are highlighted 
+            using inline <code>code</code> markup.
+          </p>
+          <p>
+            Specific notations and styling applied in this document include:
+          </p>
+          <ul>
+            <li><strong>Class &amp; File Names:</strong> Referenced with code formatting (e.g. <code>UserController.php</code>, <code>documentation.html</code>).</li>
+            <li><strong>Database Tables &amp; Fields:</strong> Formatted as lowercase code attributes (e.g. <code>users</code> table, <code>is_banned</code> column).</li>
+            <li><strong>JSON Payloads:</strong> Formatted in source code panels.</li>
+          </ul>
+        </section>
+
+        <section id="audience">
+          <h3>1.3 Intended Audience and Reading Suggestions</h3>
+          <p>
+            This document is written for academic evaluators, software developers, database administrators, and QA engineers. 
+            For a high-level overview, readers should focus on <strong>Section 2 (Overall Description)</strong>. Developers and 
+            database designers will find the technical details in <strong>Section 4 (System Features)</strong> and 
+            <strong>Section 6 (Technical Details)</strong> most relevant.
+          </p>
+          <p>
+            Evaluating professors are suggested to review the security architecture in <strong>Section 5 (Other Nonfunctional Requirements)</strong> 
+            and the database relationships in <strong>Section 6.1 (Database Schema)</strong> to verify compliance with course rules.
+          </p>
+        </section>
+
+        <section id="product-scope">
+          <h3>1.4 Product Scope</h3>
+          <p>
+            Local Greetings is a specialized web application built with a PHP backend and a pure HTML5/CSS3/JavaScript frontend. 
+            It aims to solve the problem of finding partners for team sports (like football, basketball, and tennis) and discovering 
+            available playing venues in the city of Iași. It does this by offering an interactive map powered by Leaflet, email 
+            verification, customizable user profiles, dynamic event creation, and an admin dashboard for moderation.
+          </p>
+          <p>
+            The system acts as a real-time event generator, enabling users to:
+          </p>
+          <ul>
+            <li>Organize matches, coordinate venues, and join local groups.</li>
+            <li>Subscribe to specific locations to receive email digests whenever a new match is scheduled at that court.</li>
+            <li>Limit login brute-force attempts and verify email authenticity before engaging in the community.</li>
+          </ul>
+        </section>
+
+        <section id="references">
+          <h3>1.5 References</h3>
+          <ul>
+            <li>
+              W3C Scholarly HTML Specification: 
+              <a href="https://w3c.github.io/scholarly-html/">https://w3c.github.io/scholarly-html/</a>
+            </li>
+            <li>
+              IEEE SRS Template: 
+              <a href="https://github.com/rick4470/IEEE-SRS-Tempate">https://github.com/rick4470/IEEE-SRS-Tempate</a>
+            </li>
+            <li>
+              Leaflet JS Map Library: 
+              <a href="https://leafletjs.com/">https://leafletjs.com/</a>
+            </li>
+            <li>
+              OpenStreetMap API: 
+              <a href="https://www.openstreetmap.org/">https://www.openstreetmap.org/</a>
+            </li>
+            <li>
+              PHP Data Objects (PDO) Documentation: 
+              <a href="https://www.php.net/manual/en/book.pdo.php">https://www.php.net/manual/en/book.pdo.php</a>
+            </li>
+          </ul>
+        </section>
+      </section>
+
+      <!-- Overall Description -->
+      <section id="overall-description" role="doc-chapter">
+        <h2>2. Overall Description</h2>
+
+        <section id="product-perspective">
+          <h3>2.1 Product Perspective</h3>
+          <p>
+            Local Greetings is a self-contained, lightweight web application. It operates under a classic client-server model, 
+            where the frontend communicates with the server via structured RESTful JSON APIs. The backend utilizes PHP 8.x for routing 
+            and data modeling (using custom Models and Controllers), and MySQL for persistence.
+          </p>
+          <p>
+            The client frontend consists of static HTML, CSS, and JS files served by the web server. Since there is no heavy framework 
+            overhead (such as Node compilation), the client remains fast and consumes minimal memory. All database actions, logic 
+            checking, and email rendering are delegated to the server.
+          </p>
+          <div class="callout callout-info" role="note">
+            <strong>Architecture Note:</strong> The platform is completely decoupled. Frontend pages are static HTML/JS files 
+            which perform asynchronous <code>fetch</code> requests to the PHP endpoints under <code>backend/public/</code>.
+          </div>
+        </section>
+
+        <section id="product-functions">
+          <h3>2.2 Product Functions</h3>
+          <p>The primary functions of the Local Greetings platform include:</p>
+          <ul>
+            <li><strong>User Account Management:</strong> Registration, email verification, login attempt limits (brute-force protection), token-based persistent sessions, and password recovery.</li>
+            <li><strong>Event Creation &amp; Management:</strong> Organizers can create events specifying start/end date, maximum participants, skill levels (Beginner, Medium, Expert), sport type, and specific venues.</li>
+            <li><strong>Interactive Map:</strong> Visualizes sports venues in Iași using coordinate markers with popups containing venue information and active events.</li>
+            <li><strong>Search and Filter Engine:</strong> Enables users to search events by keywords, filter by sport type, venue, date, or skill levels.</li>
+            <li><strong>Profile and Statistics:</strong> Visualizes user-specific game metrics, favorite sports, favorite zones, and active event subscriptions.</li>
+            <li><strong>Administrative Controls:</strong> Allows administrators to ban inappropriate users and delete events that violate community guidelines.</li>
+          </ul>
+        </section>
+
+        <section id="user-classes">
+          <h3>2.3 User Classes and Characteristics</h3>
+          <ol>
+            <li>
+              <strong>Unauthenticated Guests:</strong> Can view the home page, read the latest events list, and browse venues on the search map. Cannot join or create events.
+            </li>
+            <li>
+              <strong>Registered Athletes:</strong> Verified users who can create events, join existing events, comment on event pages, subscribe to locations, and customize their profiles.
+            </li>
+            <li>
+              <strong>Administrators:</strong> Users with elevated privileges (<code>role = 'admin'</code>) who access the Admin Panel to ban users, delete events, and audit access tokens.
+            </li>
+          </ol>
+        </section>
+
+        <section id="operating-environment">
+          <h3>2.4 Operating Environment</h3>
+          <ul>
+            <li><strong>Client-Side:</strong> Modern web browsers (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+) on Desktop and Mobile.</li>
+            <li><strong>Server-Side:</strong> Apache/Nginx web server with PHP 8.0+ and MySQL 5.7+ (local deployment using XAMPP/WAMP is fully supported).</li>
+          </ul>
+        </section>
+
+        <section id="design-constraints">
+          <h3>2.5 Design and Implementation Constraints</h3>
+          <p>
+            The frontend is written in vanilla HTML5, CSS3, and JavaScript to keep the page load footprint minimal. No heavy frontend 
+            frameworks (like React, Angular, or Vue) are used. On the backend, routing and database interactions are written in raw PHP 
+            (conforming to PSR standards for autoloading and MVC partitioning) to ensure simple deployment on standard web hosting packages.
+          </p>
+          <p>
+            Additionally, database access must strictly route through PDO prepared statements, and session data is restricted to bearer 
+            tokens to maintain database-level authentication, making the API stateless.
+          </p>
+          <p>
+            <strong>JavaScript OOP Constraint:</strong> As the frontend script handles lightweight DOM manipulations and event dispatching, 
+            it does not warrant complex Object-Oriented JS structures. Instead, it relies on procedural and functional event bindings 
+            (such as event listeners on specific forms).
+          </p>
+          <p>
+            <strong>Fara WebSockets (WebSocket Exclusion):</strong> Real-time syncing is managed purely via HTTP polling/REST AJAX 
+            calls instead of WebSockets. This avoids the overhead of managing concurrent socket threads and persistent TCP connections, 
+            making the server stateless and highly reliable. If an update occurs, the browser makes a new <code>fetch</code> request to 
+            asynchronously reload the modified elements.
+          </p>
+        </section>
+
+        <section id="user-documentation">
+          <h3>2.6 User Documentation</h3>
+          <p>
+            An interactive install guide is provided in the project repository root (<a href="README.md">README.md</a> and 
+            <a href="admin-install-guide.md">admin-install-guide.md</a>), detailing XAMPP setup, database initialization, 
+            and local SMTP log configurations.
+          </p>
+        </section>
+
+        <section id="assumptions-dependencies">
+          <h3>2.7 Assumptions and Dependencies</h3>
+          <ul>
+            <li>It is assumed that the client machine has an active internet connection to load external resources like Google Fonts and Leaflet tile assets.</li>
+            <li>Database connection relies on MySQL running on port <code>3306</code> with credentials matching <code>backend/db_connection.php</code>.</li>
+            <li>It is assumed that the server environment supports standard PHP timezone configurations to properly evaluate event date ranges.</li>
+          </ul>
+        </section>
+      </section>
+
+      <!-- External Interface Requirements -->
+      <section id="external-interfaces" role="doc-chapter">
+        <h2>3. External Interface Requirements</h2>
+
+        <section id="user-interfaces">
+          <h3>3.1 User Interfaces</h3>
+          <p>
+            The user interface is designed with a premium, responsive layout. It features a sticky navigation bar with glassmorphism, 
+            vibrant badges indicating sports, and a clean card grid for event listings. Headings use the Google Font <em>Outfit</em>, 
+            and body text uses <em>Inter</em>. The UI is designed to scale dynamically from mobile devices (min 320px) to large 
+            screens (up to 1920px).
+          </p>
+          <p>
+            Key screens include:
+          </p>
+          <ul>
+            <li><strong>Homepage (index.html):</strong> Features a prominent featured event card, a grid showing upcoming activities, and the event creation form.</li>
+            <li><strong>Map Finder (search.html):</strong> A split-pane layout displaying the interactive map on the left and a list of matching venue cards on the right.</li>
+            <li><strong>Profile Area (profile.html):</strong> Displays activity metrics (number of games joined, hosted, usual zones) using responsive CSS bars.</li>
+          </ul>
+        </section>
+
+        <section id="hardware-interfaces">
+          <h3>3.2 Hardware Interfaces</h3>
+          <p>
+            There are no special hardware interfaces. The application uses standard pointer input (mouse, trackpad) and touch screen 
+            gestures on mobile devices, alongside keyboard accessibility controls.
+          </p>
+        </section>
+
+        <section id="software-interfaces">
+          <h3>3.3 Software Interfaces</h3>
+          <p>
+            The platform interfaces with a MySQL database via the PHP <code>PDO</code> driver. The map page embeds 
+            <strong>Leaflet JS</strong> which communicates with the <strong>OpenStreetMap</strong> API to pull map tile assets. 
+            Mail generation interfaces with a local mail log (<code>backend/storage/mail.log</code>) or standard external 
+            <strong>SMTP servers</strong> (like Gmail SMTP).
+          </p>
+        </section>
+
+        <section id="comm-interfaces">
+          <h3>3.4 Communications Interfaces</h3>
+          <p>
+            All network communication between client and server is done via HTTPS using asynchronous HTTP requests (AJAX/Fetch API). 
+            API payloads are structured strictly in application/json. Sessions are managed using custom token hashes sent in the 
+            <code>Authorization: Bearer &lt;token&gt;</code> header.
+          </p>
+          <p>
+            <strong>Authorization Header Handling:</strong> The client JavaScript injects the token explicitly using standard Fetch request headers:
+          </p>
+          <figure typeof="schema:SoftwareSourceCode" id="auth-header-js">
+            <pre><code>headers = {
+  Accept: "application/json",
+  Authorization: `Bearer ${token}`
+};</code></pre>
+            <figcaption>Client-side Authorization header setup (non-cookie based)</figcaption>
+          </figure>
+          <p>
+            This avoids relying on automatic server variables which are frequently stripped by Apache modular configurations. 
+            On the backend, `Request::bearerToken()` checks both `HTTP_AUTHORIZATION` and fallback headers like `X-Auth-Token` to ensure 
+            complete cross-server compatibility.
+          </p>
+        </section>
+      </section>
+
+      <!-- System Features -->
+      <section id="system-features" role="doc-chapter">
+        <h2>4. System Features</h2>
+
+        <section id="feature-auth">
+          <h3>4.1 Authentication &amp; Account Protection</h3>
+          <h4>Description</h4>
+          <p>
+            Allows users to securely register, verify their email address, login, and reset their password.
+          </p>
+          <h4>Server-Side Credential Verification</h4>
+          <p>
+            When registering or logging in, the server performs extensive validation on the credentials:
+          </p>
+          <ul>
+            <li><strong>Email:</strong> Validated against RFC 5322 specifications using PHP's <code>filter_var($email, FILTER_VALIDATE_EMAIL)</code> and converted to lowercase to prevent duplicates.</li>
+            <li><strong>Password:</strong> Register requires a minimum length of 8 characters and must contain at least one letter and one number. In database storage, passwords are hashed using `password_hash($password, PASSWORD_DEFAULT)` which implements secure `bcrypt` rounds.</li>
+          </ul>
+          <h4>Stimulus/Response Sequence</h4>
+          <div class="callout callout-info" role="note">
+            <strong>Lockout logic:</strong> If a user fails to login 5 times consecutively, their account email is locked for 10 minutes (stored in the <code>login_attempts</code> table), preventing brute-force attacks.
+          </div>
+          <ul>
+            <li><strong>Stimulus:</strong> User enters email and password on the login screen.</li>
+            <li><strong>Response:</strong> Server checks <code>login_attempts</code>. If not locked, it fetches the user from the database, verifies the password hash, updates attempt counters, generates an auth token, and returns it to the client.</li>
+          </ul>
+        </section>
+
+        <section id="feature-events">
+          <h3>4.2 Event Management</h3>
+          <h4>Description</h4>
+          <p>
+            Registered users can schedule sports events.
+          </p>
+          <h4>Event Overlap Check (Validation)</h4>
+          <p>
+            To prevent double-booking of sports courts and venues, the event creation engine validates that the target venue 
+            does not have any active events scheduled within 2 hours of the requested start time.
+          </p>
+          <figure typeof="schema:SoftwareSourceCode" id="event-overlap-php">
+            <pre><code>$statement = $this->pdo->prepare('
+    SELECT COUNT(*) FROM events 
+    INNER JOIN locations ON locations.id = events.location_id
+    WHERE LOWER(locations.name) = LOWER(:location)
+      AND (events.status IS NULL OR events.status = "open")
+      AND ABS(TIMESTAMPDIFF(MINUTE, events.event_date, :event_date)) < 120
+');</code></pre>
+            <figcaption>Backend validation check for venue availability</figcaption>
+          </figure>
+          <p>
+            If the count exceeds 0, the server rejects the request with a `422 Unprocessable Entity` status code and return a clear validation error to the client, preventing double-scheduling.
+          </p>
+        </section>
+
+        <section id="feature-search">
+          <h3>4.3 Search Engine &amp; Interactive Venue Map</h3>
+          <h4>Description</h4>
+          <p>
+            Browsing and filtering events.
+          </p>
+          <h4>Functionality</h4>
+          <p>
+            The map visualizes different zones in Iași (e.g. Copou, Tătărași, Nicolina). Clicking on 
+            a location pin reveals active meetups scheduled there. Users can use filter chips to refine listings by sport type, date, 
+            or skill level.
+          </p>
+          <h4>RSS Feed Reader Integration</h4>
+          <p>
+            The platform generates an XML RSS 2.0 feed at <code>backend/public/rss.php</code> containing all upcoming sports events. 
+            This allows external aggregators and calendars to subscribe to city sports activities.
+          </p>
+        </section>
+
+        <section id="feature-admin">
+          <h3>4.4 Admin Dashboard</h3>
+          <h4>Description</h4>
+          <p>
+            Central administration page (<code>admin.html</code>) accessible only to users with the 
+            <code>role = 'admin'</code> flag.
+          </p>
+          <h4>Moderation Actions</h4>
+          <p>
+            Administrators can view a list of all users, revoke access (banning them, which immediately invalidates all active auth tokens in the database), 
+            and delete inappropriate events. Banning updates the <code>is_banned</code> column in the database and revokes associated tokens:
+          </p>
+          <figure typeof="schema:SoftwareSourceCode" id="admin-ban-php">
+            <pre><code>if ($newStatus === true) {
+    $statement = $this->pdo->prepare('UPDATE auth_tokens SET revoked_at = NOW() WHERE user_id = :user_id');
+    $statement->execute(['user_id' => $id]);
+}</code></pre>
+            <figcaption>Token revocation upon banning a user</figcaption>
+          </figure>
+        </section>
+      </section>
+
+      <!-- Nonfunctional Requirements -->
+      <section id="nonfunctional-reqs" role="doc-chapter">
+        <h2>5. Other Nonfunctional Requirements</h2>
+
+        <section id="performance">
+          <h3>5.1 Performance Requirements</h3>
+          <ul>
+            <li>API responses from the backend should resolve within 200ms under standard loads.</li>
+            <li>Static assets (HTML, CSS, images) should be optimized to score 90+ on Lighthouse performance audits.</li>
+            <li>The Leaflet map page should lazy-load markers based on visible map bounds to minimize DOM overhead on mobile devices.</li>
+          </ul>
+        </section>
+
+        <section id="safety">
+          <h3>5.2 Safety Requirements</h3>
+          <p>
+            The system employs soft deletes for major records, and email links have short validation windows (1 hour for verification 
+            and password resets) to prevent unauthorized hijackings.
+          </p>
+        </section>
+
+        <section id="security">
+          <h3>5.3 Security Requirements</h3>
+          <ul>
+            <li><strong>Password Security:</strong> Passwords must be hashed using the secure <code>bcrypt</code> algorithm (via PHP's <code>password_hash</code>).</li>
+            <li><strong>SQL Injection:</strong> All database queries use prepared statements with parameter binding via PDO (no raw queries with variable interpolation are allowed).</li>
+            <li><strong>Cross-Site Scripting (XSS):</strong> Input data rendered in the DOM is sanitized using text node parsing or escaping helpers. The application strictly forbids using <code>innerHTML</code> in client-side scripts to prevent script execution vulnerabilities.</li>
+            <li><strong>Cross-Site Request Forgery (CSRF):</strong> Critical POST operations require valid CSRF tokens verified on the backend.</li>
+          </ul>
+          <h4>Stateless CSRF Protection</h4>
+          <p>
+            To prevent cross-site request forgery without session state overhead, the backend signs CSRF tokens using HMAC-SHA256:
+          </p>
+          <figure typeof="schema:SoftwareSourceCode" id="csrf-php-class">
+            <pre><code>$payload = time() . ':' . bin2hex(random_bytes(16));
+$signature = hash_hmac('sha256', $payload, self::secret());
+return base64_encode($payload . ':' . $signature);</code></pre>
+            <figcaption>HMAC-SHA256 CSRF Token generation</figcaption>
+          </figure>
+          <p>
+            This token contains a timestamp. When checking validity, the server decodes the token, verifies that it hasn't expired (TTL of 2 hours), 
+            recomputes the signature using `hash_equals` (timing attack safe comparison), ensuring absolute stateless safety.
+          </p>
+        </section>
+
+        <section id="quality-attributes">
+          <h3>5.4 Software Quality Attributes</h3>
+          <p>
+            The project relies on decoupled components, separating business logic into specific Controllers (e.g., 
+            <code>UserController.php</code>, <code>EventController.php</code>) and models mapping database interactions. This ensures 
+            high maintainability and extensibility.
+          </p>
+        </section>
+
+        <section id="business-rules">
+          <h3>5.5 Business Rules</h3>
+          <p>
+            Users must verify their email addresses prior to gaining event creation and comment posting privileges. Banned users are 
+            immediately logged out, their active auth tokens are revoked, and their credentials block subsequent login attempts.
+          </p>
+        </section>
+      </section>
+
+      <!-- Technical Architecture Section -->
+      <section id="technical-architecture">
+        <h2>6. Technical Details &amp; Architecture</h2>
+        <p>
+          The system architecture is modeled using the C4 model methodology, presenting the structure of the system 
+          across different levels of abstraction: System Context (Level 1) and Containers (Level 2).
+        </p>
+
+        <h3>6.0.1 C4 Level 1: System Context Diagram</h3>
+        <p>
+          The System Context Diagram shows the high-level boundary of the Local Greetings platform, its primary actors 
+          (athletes and administrators), and the external systems it depends on for map rendering and communication.
+        </p>
+        
+        <div class="mermaid">
+flowchart TB
+  classDef userStyle fill:#eef4f1,stroke:#167F7A,color:#142320,stroke-width:2px;
+  classDef systemStyle fill:#e6f4f2,stroke:#0F5F5B,color:#142320,stroke-width:2px;
+  classDef externalStyle fill:#f4f7f6,stroke:#d8e2df,color:#64736f,stroke-width:2px;
+
+  Person[Registered Athlete / Admin<br/>Athletes looking for sports events]:::userStyle
+  System[Local Greetings System<br/>Interactive Sports Platform]:::systemStyle
+  OSM[OpenStreetMap / Leaflet<br/>Map Tile Provider]:::externalStyle
+  SMTP[SMTP Email Server<br/>Gmail / Local Mail Logger]:::externalStyle
+
+  Person -->|Uses Web App via Browser| System
+  System -->|Fetches Map Tiles| OSM
+  System -->|Sends verification/reset emails| SMTP
+        </div>
+
+        <h3>6.0.2 C4 Level 2: Container Diagram</h3>
+        <p>
+          The Container Diagram refines the System Context by showing the separate containers (Single Page Application, 
+          REST API Engine, and Database) that make up the Local Greetings system, their technologies, and their communication paths.
+        </p>
+
+        <div class="mermaid">
+flowchart TB
+  classDef userStyle fill:#eef4f1,stroke:#167F7A,color:#142320,stroke-width:2px;
+  classDef containerStyle fill:#e6f4f2,stroke:#0F5F5B,color:#142320,stroke-width:2px;
+  classDef dbStyle fill:#fdf6e2,stroke:#f4c95d,color:#142320,stroke-width:2px;
+  classDef externalStyle fill:#f4f7f6,stroke:#d8e2df,color:#64736f,stroke-width:2px;
+
+  User[Registered Athlete / Admin<br/>Uses Browser Client]:::userStyle
+  
+  subgraph LocalGreetingsSystem [Local Greetings System Boundary]
+    SPA[Single Page Application<br/>HTML5 / CSS3 / Vanilla JS]:::containerStyle
+    API[REST API Engine<br/>Vanilla PHP 8.x MVC]:::containerStyle
+    DB[(MySQL Database<br/>Relational Database Schema)]:::dbStyle
+  end
+
+  OSM[OpenStreetMap API<br/>Tile Server]:::externalStyle
+  SMTP[SMTP Email Server<br/>Local Mail Logger]:::externalStyle
+
+  User -->|Interacts with navigation / map| SPA
+  SPA -->|Asynchronous REST API calls / JSON| API
+  SPA -->|Loads Map Tiles| OSM
+  API -->|Reads / Writes data using PDO| DB
+  API -->|Triggers email delivery| SMTP
+        </div>
+
+        <h3>6.0.3 C4 Level 3: Component Diagram</h3>
+        <p>
+          The Component Diagram focuses inside the <strong>REST API Engine</strong> container (PHP Backend), displaying 
+          the internal controllers, models, and utility components that process business logic, database querying, and mail services.
+        </p>
+
+        <div class="mermaid">
+flowchart TB
+  classDef clientStyle fill:#eef4f1,stroke:#167F7A,color:#142320,stroke-width:2px;
+  classDef entryStyle fill:#eef4f1,stroke:#0F5F5B,color:#142320,stroke-width:2px;
+  classDef controllerStyle fill:#e6f4f2,stroke:#0F5F5B,color:#142320,stroke-width:2px;
+  classDef modelStyle fill:#ebf3fc,stroke:#4267ac,color:#142320,stroke-width:2px;
+  classDef supportStyle fill:#f5f7f6,stroke:#d8e2df,color:#64736f,stroke-width:2px;
+  classDef dbStyle fill:#fdf6e2,stroke:#f4c95d,color:#142320,stroke-width:2px;
+
+  SPA[Single Page Application<br/>HTML/CSS/JS Client]:::clientStyle
+  DB[(MySQL Database<br/>Relational Schema)]:::dbStyle
+
+  subgraph RESTAPIEngine [REST API Engine Boundary]
+    Router[PHP Entry Points<br/>public/*.php]:::entryStyle
+    Bootstrap[Bootstrap &amp; CSRF Check<br/>bootstrap.php]:::entryStyle
+    
+    UserController[UserController<br/>App\Controllers\UserController]:::controllerStyle
+    EventController[EventController<br/>App\Controllers\EventController]:::controllerStyle
+    LocationController[LocationController<br/>App\Controllers\LocationController]:::controllerStyle
+    AdminController[AdminController<br/>App\Controllers\AdminController]:::controllerStyle
+
+    UserModel[User Model<br/>App\Models\User]:::modelStyle
+    EventModel[Event Model<br/>App\Models\Event]:::modelStyle
+    LocationModel[Location Model<br/>App\Models\Location]:::modelStyle
+
+    AuthHelper[Auth Middleware<br/>App\Support\Auth]:::supportStyle
+    CsrfHelper[CSRF Signer<br/>App\Support\Csrf]:::supportStyle
+    MailerHelper[Mailer Helper<br/>App\Support\Mailer]:::supportStyle
+  end
+
+  SPA -->|Request / Bearer Token| Router
+  Router -->|Validates| Bootstrap
+  Bootstrap -->|Uses signed check| CsrfHelper
+  
+  Router -->|Delegates to| UserController
+  Router -->|Delegates to| EventController
+  Router -->|Delegates to| LocationController
+  Router -->|Delegates to| AdminController
+
+  UserController -->|Authenticates via| AuthHelper
+  UserController -->|Reads / Writes| UserModel
+  UserController -->|Triggers verification mail| MailerHelper
+
+  EventController -->|Validates overlap &amp; creates| EventModel
+  EventController -->|Fetches locations| LocationModel
+  EventController -->|Sends subscriptions notice| MailerHelper
+
+  AdminController -->|Bans users| UserModel
+  AdminController -->|Moderates events| EventModel
+
+  UserModel -->|Query via PDO| DB
+  EventModel -->|Query via PDO| DB
+  LocationModel -->|Query via PDO| DB
+        </div>
+
+        <h3>6.0.4 C4 Level 4: Code Diagram (Class Structure)</h3>
+        <p>
+          The UML Class Diagram below outlines the structure, methods, attributes, and relationships of the primary 
+          PHP backend classes, mapping directly to the Level 4 C4 model.
+        </p>
+
+        <div class="mermaid">
+classDiagram
+  class UserController {
+    -User users
+    -Mailer mailer
+    +register(array payload) void
+    +login(array payload) void
+    +me() void
+    +logout() void
+    +resetPassword(array payload) void
+  }
+  class EventController {
+    -Event events
+    -User users
+    -Location locations
+    -Mailer mailer
+    +index(int locationId) void
+    +show(int id) void
+    +create(array payload) void
+    +join(int id) void
+  }
+  class AdminController {
+    -User users
+    -Event events
+    -Location locations
+    +listUsers() void
+    +toggleUserBan() void
+    +listEvents() void
+    +toggleEventBan() void
+  }
+  class User {
+    -PDO pdo
+    +findByEmail(string email) array
+    +create(string username, string email, string passwordHash) array
+    +createAuthToken(int userId, string tokenHash) void
+    +toggleBan(int id) bool
+  }
+  class Event {
+    -PDO pdo
+    +all(int userId, int locationId) array
+    +create(array payload, int organizerId) array
+    +validate(array payload) array
+    +join(int eventId, int userId) array
+  }
+  class Location {
+    -PDO pdo
+    +all() array
+    +subscriberEmailsForLocation(int locId, int orgId) array
+  }
+  class Auth {
+    +user(User users) array
+    +tokenHash(string token) string
+  }
+  class Csrf {
+    +token() string
+    +isValid(string token) bool
+  }
+
+  UserController --> User : queries
+  UserController --> Mailer : sends mail
+  EventController --> Event : queries
+  EventController --> User : authenticates
+  EventController --> Location : queries
+  AdminController --> User : moderates
+  AdminController --> Event : moderates
+  AdminController --> Location : moderates
+  User --> PDO : db handle
+  Event --> PDO : db handle
+  Location --> PDO : db handle
+        </div>
+
+        <section id="db-schema-details">
+          <h3>6.1 Database Schema Details</h3>
+          <p>
+            The database structure uses foreign key constraints to maintain referential integrity. User profiles and auth tokens 
+            are cascade deleted if the main user record is removed.
+          </p>
+          <figure typeof="schema:SoftwareSourceCode" id="db-schema-sql">
+            <pre><code>CREATE TABLE `users` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `username` varchar(80) NOT NULL,
+  `email` varchar(255) NOT NULL UNIQUE,
+  `password_hash` varchar(255) NOT NULL,
+  `role` enum('user', 'moderator', 'admin') NOT NULL DEFAULT 'user',
+  `is_banned` boolean NOT NULL DEFAULT false,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE `auth_tokens` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token_hash` varchar(64) NOT NULL UNIQUE,
+  `expires_at` datetime NOT NULL,
+  `revoked_at` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `events` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `location_id` int,
+  `sport_id` int,
+  `organizer_id` int,
+  `title` varchar(255),
+  `description` text,
+  `event_date` datetime,
+  `end_date` datetime,
+  `max_participants` int,
+  `skill_level` varchar(255),
+  `status` varchar(255),
+  `created_at` timestamp,
+  FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`),
+  FOREIGN KEY (`sport_id`) REFERENCES `sports` (`id`),
+  FOREIGN KEY (`organizer_id`) REFERENCES `users` (`id`)
+);</code></pre>
+            <figcaption>MySQL Database Schema DDL</figcaption>
+          </figure>
+        </section>
+
+        <section id="autoloading-mvc">
+          <h3>6.2 Autoloading &amp; MVC Design</h3>
+          <p>
+            The project maps classes under the <code>App\</code> namespace to files inside the <code>backend/src/</code> folder. 
+            Autoloading is registered in <code>backend/autoload.php</code>. Controllers intercept frontend requests and return structured 
+            JSON responses via <code>App\Support\Response::json()</code>.
+          </p>
+          <figure typeof="schema:SoftwareSourceCode" id="autoloader-php-code">
+            <pre><code>spl_autoload_register(function (string $class): void {
+    $prefix = 'App\\';
+    $baseDir = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
+
+    if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
+        return;
+    }
+
+    $relativeClass = substr($class, strlen($prefix));
+    $file = $baseDir . str_replace('\\', DIRECTORY_SEPARATOR, $relativeClass) . '.php';
+
+    if (file_exists($file)) {
+        require_once $file;
+    }
+});</code></pre>
+            <figcaption>Custom PHP namespace Autoloader implementation (no framework overhead)</figcaption>
+          </figure>
+          <p>
+            Request endpoints are clean and separate:
+          </p>
+          <ul>
+            <li><code>backend/public/login.php</code> maps to <code>UserController::login()</code></li>
+            <li><code>backend/public/events.php</code> maps to <code>EventController::index()</code></li>
+            <li><code>backend/public/admin/</code> directory handles restricted administrative endpoints.</li>
+          </ul>
+        </section>
+
+        <section id="securing-data">
+          <h3>6.3 Securing Data</h3>
+          <p>
+            Token storage does not use standard cookies. Tokens are saved in the client's <code>localStorage</code> and transmitted 
+            using the <code>Authorization: Bearer &lt;token&gt;</code> header. This ensures protection against standard CSRF vectors on 
+            session cookies, since scripts from other domains cannot access localStorage properties.
+          </p>
+        </section>
+      </section>
+
+      <!-- Appendices -->
+      <section id="glossary" role="doc-glossary">
+        <h2>Appendix A: Glossary</h2>
+        <dl>
+          <dt>Auth Token</dt>
+          <dd>A secure hash sent from client to server to validate user identity without using cookies or PHP sessions.</dd>
+          <dt>Leaflet JS</dt>
+          <dd>An open-source JavaScript library used for building interactive maps.</dd>
+          <dt>CSRF</dt>
+          <dd>Cross-Site Request Forgery, an attack vector where unauthorized commands are executed from a trusted user.</dd>
+          <dt>XAMPP</dt>
+          <dd>An easy-to-install Apache distribution containing MariaDB (MySQL), PHP, and Perl.</dd>
+          <dt>HMAC</dt>
+          <dd>Hash-based Message Authentication Code, a cryptographic construction used to verify message integrity and authenticity.</dd>
+        </dl>
+      </section>
+
+      <section id="analysis-models" role="doc-appendix">
+        <h2>Appendix B: Analysis Models</h2>
+        <p>The following sequence diagram represents the typical user login and event creation flow:</p>
+        <div class="mermaid">
+          sequenceDiagram
+            actor User
+            participant UI as Frontend Browser
+            participant API as PHP Backend
+            participant DB as MySQL DB
+
+            User->>UI: Fills login form
+            UI->>API: POST /login.php (credentials)
+            API->>DB: Query user &amp; verify hash
+            DB-->>API: User details (role, is_banned)
+            API->>DB: Save new token in auth_tokens
+            API-->>UI: Return token &amp; user role
+            UI->>UI: Store token in localStorage
+            Note over User, UI: Navigation updates to logged-in state
+        </div>
+      </section>
+
+    </article>
+  </main>
+</div>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
