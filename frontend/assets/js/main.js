@@ -107,9 +107,24 @@ const setFormErrors = (form, errors = {}) => {
     field.removeAttribute("aria-invalid");
     field.removeAttribute("title");
 
+    // Remove old error message span if it exists
+    const oldErrorSpan = field.parentNode.querySelector(".field-error-msg");
+    if (oldErrorSpan) {
+      oldErrorSpan.remove();
+    }
+
     if (error) {
       field.setAttribute("aria-invalid", "true");
       field.setAttribute("title", error);
+
+      const errorSpan = document.createElement("span");
+      errorSpan.className = "field-error-msg";
+      errorSpan.style.color = "var(--color-danger)";
+      errorSpan.style.fontSize = "0.8rem";
+      errorSpan.style.display = "block";
+      errorSpan.style.marginTop = "0.25rem";
+      errorSpan.textContent = error;
+      field.parentNode.appendChild(errorSpan);
     }
   });
 };
@@ -1542,3 +1557,36 @@ loadEventsList();
 initializeCreateEventForm();
 loadEventDetails();
 initializeSearchMap();
+
+const initializeEmailRssButton = () => {
+  const emailBtn = document.querySelector("#email-rss-btn");
+  const msgSpan = document.querySelector("#email-rss-message");
+
+  if (!emailBtn) return;
+
+  emailBtn.addEventListener("click", async () => {
+    emailBtn.disabled = true;
+    msgSpan.textContent = "Sending email...";
+    msgSpan.style.color = "inherit";
+
+    try {
+      const response = await apiRequest("../backend/public/email-events.php", {
+        method: "POST"
+      });
+      msgSpan.textContent = response.message || "Email sent!";
+      msgSpan.style.color = "var(--color-primary)";
+    } catch (error) {
+      const errorPayload = error.payload || {};
+      if (errorPayload.message === "Authentication required.") {
+        window.location.assign("login.html");
+        return;
+      }
+      msgSpan.textContent = errorPayload.message || error.message;
+      msgSpan.style.color = "var(--color-danger)";
+    } finally {
+      emailBtn.disabled = false;
+    }
+  });
+};
+
+initializeEmailRssButton();

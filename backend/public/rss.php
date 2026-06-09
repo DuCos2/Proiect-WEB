@@ -10,7 +10,14 @@ header('Content-Type: application/xml; charset=utf-8');
 
 $pdo = Database::connection();
 $eventsModel = new Event($pdo);
-$events = $eventsModel->all();
+
+$userId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : null;
+
+if ($userId) {
+    $events = $eventsModel->forUserInterests($userId);
+} else {
+    $events = $eventsModel->all();
+}
 
 echo '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
 echo '<rss version="2.0">' . "\n";
