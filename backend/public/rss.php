@@ -4,6 +4,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 use App\Models\Event;
 use App\Support\Database;
+use App\Support\Url;
 
 header('Content-Type: application/xml; charset=utf-8');
 
@@ -15,14 +16,14 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
 echo '<rss version="2.0">' . "\n";
 echo '  <channel>' . "\n";
 echo '    <title>Local Greetings Events Feed</title>' . "\n";
-echo '    <link>http://localhost/index.html</link>' . "\n";
+echo '    <link>' . htmlspecialchars(Url::appUrl('frontend/index.html')) . '</link>' . "\n";
 echo '    <description>Latest sports events in Iasi</description>' . "\n";
 echo '    <language>en-us</language>' . "\n";
 
 foreach ($events as $event) {
     $title = htmlspecialchars($event['title']);
     $description = htmlspecialchars($event['description'] . ' - at ' . $event['location']['name'] . ' (' . $event['location']['area'] . ') on ' . $event['eventDate']);
-    $link = htmlspecialchars("http://localhost/event-details.html?id=" . $event['id']);
+    $link = htmlspecialchars(Url::appUrl("frontend/event-details.html?id=" . $event['id']));
     $guid = $event['id'];
     $pubDate = date(DATE_RSS, strtotime($event['createdAt']));
 

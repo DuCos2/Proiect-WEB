@@ -33,6 +33,10 @@ const authState = {
 };
 
 const apiRequest = async (url, options = {}) => {
+  if (url.startsWith("backend/public/")) {
+    url = "../" + url;
+  }
+
   const headers = {
     Accept: "application/json",
     ...(options.headers || {})

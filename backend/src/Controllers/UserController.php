@@ -160,7 +160,7 @@ final class UserController
             $token = $this->newToken();
             $users->createPasswordReset((int) $user['id'], $this->tokenHash($token));
 
-            $link = Url::appUrl('reset-password.html?token=' . urlencode($token));
+            $link = Url::appUrl('frontend/reset-password.html?token=' . urlencode($token));
             $this->requireMailer()->send(
                 $user['email'],
                 'Reset your Local Greetings password',
@@ -342,7 +342,7 @@ final class UserController
         $token = $this->newToken();
         $this->requireUsers()->createEmailVerification((int) $user['id'], $this->tokenHash($token));
 
-        $link = Url::appUrl('verify-email.html?token=' . urlencode($token));
+        $link = Url::appUrl('frontend/verify-email.html?token=' . urlencode($token));
         return $this->requireMailer()->send(
             $user['email'],
             'Verify your Local Greetings email',
