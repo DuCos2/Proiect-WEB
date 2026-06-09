@@ -1,6 +1,7 @@
 # Proiect-WEB
 
 Acesta este un proiect pentru disciplina Web.
+Link prezentare: https://drive.google.com/drive/folders/1GrsLW_OdaFvO8OzD-O9mB-pcvvdaQ7dd?usp=sharing
 
 ## Structura proiectului
 
