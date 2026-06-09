@@ -152,9 +152,14 @@ final class Event
     {
         $errors = [];
 
-        foreach (['title', 'sport', 'location', 'area', 'event_date', 'end_date'] as $field) {
-            if ($this->cleanText($payload[$field] ?? '') === '') {
-                $errors[$field] = 'This field is required.';
+        foreach (['title', 'sport', 'location', 'area', 'event_date', 'end_date', 'skill_level'] as $field) {
+            $val = $this->cleanText($payload[$field] ?? '');
+            if ($val === '' || ($field === 'skill_level' && $val === 'Mixed level')) {
+                if ($field === 'skill_level') {
+                    $errors['skill_levels'] = 'Please select at least one skill level.';
+                } else {
+                    $errors[$field] = 'This field is required.';
+                }
             }
         }
 
@@ -183,26 +188,29 @@ final class Event
             $errors['end_date'] = 'The end date must be after the start date.';
         }
 
-        if (!isset($errors['event_date']) && !empty($payload['location']) && !empty($payload['event_date'])) {
+        if (!isset($errors['event_date']) && !isset($errors['end_date']) && !empty($payload['location']) && !empty($payload['event_date']) && !empty($payload['end_date'])) {
             $locationName = $payload['location'];
             $eventDate = $this->normalizeDate($payload['event_date']);
+            $endDate = $this->normalizeDate($payload['end_date']);
 
-            if ($eventDate !== null) {
+            if ($eventDate !== null && $endDate !== null) {
                 $statement = $this->pdo->prepare('
                     SELECT COUNT(*) FROM events 
                     INNER JOIN locations ON locations.id = events.location_id
                     WHERE LOWER(locations.name) = LOWER(:location)
                       AND (events.status IS NULL OR events.status = "open")
-                      AND ABS(TIMESTAMPDIFF(MINUTE, events.event_date, :event_date)) < 120
+                      AND events.event_date < :end_date
+                      AND events.end_date > :event_date
                 ');
                 $statement->execute([
                     'location' => $locationName,
-                    'event_date' => $eventDate
+                    'event_date' => $eventDate,
+                    'end_date' => $endDate
                 ]);
                 $overlapCount = (int) $statement->fetchColumn();
 
                 if ($overlapCount > 0) {
-                    $errors['event_date'] = 'There is already another event scheduled at this location within this time window (2 hours).';
+                    $errors['event_date'] = 'There is already another event scheduled at this location that overlaps with this time.';
                 }
             }
         }

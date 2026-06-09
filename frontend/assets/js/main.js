@@ -895,7 +895,7 @@ const initializeCreateEventForm = async () => {
     } else if (selectedLevels.length > 0) {
       skillLevelString = selectedLevels.join(", ");
     } else {
-      skillLevelString = "Mixed level";
+      skillLevelString = "";
     }
     payload.skill_level = skillLevelString;
     delete payload.skill_levels;
