@@ -37,6 +37,24 @@ final class Event
         );
     }
 
+    public function forUserInterests(int $userId): array
+    {
+        $statement = $this->pdo->prepare($this->baseSelect() . '
+            INNER JOIN user_subscriptions ON user_subscriptions.location_id = events.location_id
+            WHERE user_subscriptions.user_id = :user_id
+              AND (events.status IS NULL OR events.status = "open")
+              AND (events.end_date >= NOW() OR events.end_date IS NULL)
+            ORDER BY events.event_date ASC, events.created_at DESC
+            LIMIT 50
+        ');
+        $statement->execute(['user_id' => $userId]);
+
+        return array_map(
+            fn (array $event): array => $this->present($event, $userId),
+            $statement->fetchAll()
+        );
+    }
+
     public function find(int $id, ?int $userId = null): ?array
     {
         $statement = $this->pdo->prepare($this->baseSelect() . '
