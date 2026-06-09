@@ -42,6 +42,14 @@ const apiRequest = async (url, options = {}) => {
     headers.Authorization = `Bearer ${authState.token}`;
   }
 
+  const method = (options.method || "GET").toUpperCase();
+  if (["POST", "PUT", "DELETE"].includes(method) && !url.includes("csrf.php")) {
+    const csrfToken = await getCsrfToken();
+    if (csrfToken) {
+      headers["X-CSRF-Token"] = csrfToken;
+    }
+  }
+
   const response = await fetch(url, {
     credentials: "same-origin",
     ...options,
@@ -152,6 +160,7 @@ const updateAuthNavigation = async () => {
   const registerLink = mainNav.querySelector('a[href="register.html"]');
   const profileLink = mainNav.querySelector('a[href="profile.html"]');
   let logoutButton = mainNav.querySelector(".nav-logout");
+  let adminLink = mainNav.querySelector('a[href="admin.html"]');
 
   if (user) {
     if (loginLink) {
@@ -168,6 +177,20 @@ const updateAuthNavigation = async () => {
     }
 
     logoutButton.hidden = false;
+
+    // Handle Admin Panel Navigation Link
+    if (user.role === 'admin') {
+      if (!adminLink) {
+        adminLink = document.createElement("a");
+        adminLink.href = "admin.html";
+        adminLink.textContent = "Admin";
+        mainNav.insertBefore(adminLink, logoutButton);
+      }
+      adminLink.hidden = false;
+    } else if (adminLink) {
+      adminLink.hidden = true;
+    }
+
     return;
   }
 
@@ -181,6 +204,10 @@ const updateAuthNavigation = async () => {
 
   if (logoutButton) {
     logoutButton.hidden = true;
+  }
+
+  if (adminLink) {
+    adminLink.hidden = true;
   }
 };
 
@@ -622,7 +649,14 @@ const loadEventsList = async () => {
     if (!payload.events.length) {
       const empty = document.createElement("article");
       empty.className = "event-card";
-      empty.innerHTML = '<div class="card-body"><h3>No events yet</h3><p>Be the first person to add one.</p></div>';
+      const cardBody = document.createElement("div");
+      cardBody.className = "card-body";
+      const h3 = document.createElement("h3");
+      h3.textContent = "No events yet";
+      const p = document.createElement("p");
+      p.textContent = "Be the first person to add one.";
+      cardBody.append(h3, p);
+      empty.append(cardBody);
       eventsRoot.append(empty);
       updateFeaturedEvent(null);
       return;
@@ -634,7 +668,18 @@ const loadEventsList = async () => {
       eventsRoot.append(renderEventCard(eventItem));
     });
   } catch (error) {
-    eventsRoot.innerHTML = '<article class="event-card"><div class="card-body"><h3>Events could not be loaded</h3><p>Try refreshing the page.</p></div></article>';
+    eventsRoot.replaceChildren();
+    const article = document.createElement("article");
+    article.className = "event-card";
+    const cardBody = document.createElement("div");
+    cardBody.className = "card-body";
+    const h3 = document.createElement("h3");
+    h3.textContent = "Events could not be loaded";
+    const p = document.createElement("p");
+    p.textContent = "Try refreshing the page.";
+    cardBody.append(h3, p);
+    article.append(cardBody);
+    eventsRoot.append(article);
   }
 };
 
@@ -699,34 +744,91 @@ const initializeCreateEventForm = async () => {
   const areaSelect = form.querySelector('[name="area"]');
   let locationsList = [];
 
+  const selectedLocation = () => {
+    const selectedOption = locationSelect.options[locationSelect.selectedIndex];
+    const selectedId = selectedOption ? selectedOption.dataset.locationId : null;
+
+    return locationsList.find(loc => String(loc.id) === selectedId) ||
+      locationsList.find(loc => loc.name === locationSelect.value);
+  };
+
+  const ensureAreaOption = (area) => {
+    if (!areaSelect || !area || !areaSelect.options) {
+      return;
+    }
+
+    const existingOption = Array.from(areaSelect.options).find(option => option.value === area);
+
+    if (existingOption) {
+      return;
+    }
+
+    const option = document.createElement("option");
+    option.value = area;
+    option.textContent = area;
+    areaSelect.append(option);
+  };
+
+  const setAreaFromLocation = (location) => {
+    if (!areaSelect) {
+      return;
+    }
+
+    if (!location) {
+      areaSelect.value = "";
+      return;
+    }
+
+    ensureAreaOption(location.area);
+    areaSelect.value = location.area;
+  };
+
   if (locationSelect && sportSelect) {
     try {
       const locationsPayload = await apiRequest("backend/public/locations.php");
       locationsList = locationsPayload.locations || [];
 
-      locationSelect.innerHTML = '<option value="" disabled selected>Select a location...</option>';
+      locationSelect.replaceChildren();
+      const defaultOpt = document.createElement("option");
+      defaultOpt.value = "";
+      defaultOpt.disabled = true;
+      defaultOpt.selected = true;
+      defaultOpt.textContent = "Select a location...";
+      locationSelect.append(defaultOpt);
+
       locationsList.forEach(loc => {
         const option = document.createElement("option");
         option.value = loc.name;
+        option.dataset.locationId = String(loc.id);
         option.textContent = `${loc.name} (${loc.area})`;
         locationSelect.append(option);
+        ensureAreaOption(loc.area);
       });
     } catch (err) {
       console.error("Failed to load locations for form:", err);
-      locationSelect.innerHTML = '<option value="" disabled selected>Failed to load locations</option>';
+      locationSelect.replaceChildren();
+      const errorOpt = document.createElement("option");
+      errorOpt.value = "";
+      errorOpt.disabled = true;
+      errorOpt.selected = true;
+      errorOpt.textContent = "Failed to load locations";
+      locationSelect.append(errorOpt);
     }
 
     locationSelect.addEventListener("change", () => {
-      const selectedName = locationSelect.value;
-      const selectedLoc = locationsList.find(loc => loc.name === selectedName);
+      const selectedLoc = selectedLocation();
 
       if (selectedLoc) {
-        if (areaSelect) {
-          areaSelect.value = selectedLoc.area;
-        }
+        setAreaFromLocation(selectedLoc);
 
         sportSelect.disabled = false;
-        sportSelect.innerHTML = '<option value="" disabled selected>Select a sport...</option>';
+        sportSelect.replaceChildren();
+        const defSportOpt = document.createElement("option");
+        defSportOpt.value = "";
+        defSportOpt.disabled = true;
+        defSportOpt.selected = true;
+        defSportOpt.textContent = "Select a sport...";
+        sportSelect.append(defSportOpt);
 
         const sports = selectedLoc.sports ? selectedLoc.sports.split(", ") : [];
         sports.forEach(sport => {
@@ -738,10 +840,15 @@ const initializeCreateEventForm = async () => {
       } else {
 
         sportSelect.disabled = true;
-        sportSelect.innerHTML = '<option value="" disabled selected>First select the location...</option>';
-        if (areaSelect) {
-          areaSelect.value = "";
-        }
+        sportSelect.replaceChildren();
+        const fallbackOpt = document.createElement("option");
+        fallbackOpt.value = "";
+        fallbackOpt.disabled = true;
+        fallbackOpt.selected = true;
+        fallbackOpt.textContent = "First select the location...";
+        sportSelect.append(fallbackOpt);
+
+        setAreaFromLocation(null);
       }
     });
   }
@@ -755,7 +862,13 @@ const initializeCreateEventForm = async () => {
 
     const submitButton = form.querySelector("[type='submit']");
     const payload = Object.fromEntries(new FormData(form).entries());
+    const currentLocation = locationSelect ? selectedLocation() : null;
     const selectedLevels = Array.from(form.querySelectorAll('input[name="skill_levels"]:checked')).map(checkbox => checkbox.value);
+
+    if (currentLocation) {
+      payload.location = currentLocation.name;
+      payload.area = currentLocation.area;
+    }
 
     let skillLevelString = "";
     if (selectedLevels.length === 3) {
@@ -786,9 +899,16 @@ const initializeCreateEventForm = async () => {
       });
 
       form.reset();
+      form.reset();
       if (sportSelect) {
         sportSelect.disabled = true;
-        sportSelect.innerHTML = '<option value="" disabled selected>First select the location...</option>';
+        sportSelect.replaceChildren();
+        const resetOpt = document.createElement("option");
+        resetOpt.value = "";
+        resetOpt.disabled = true;
+        resetOpt.selected = true;
+        resetOpt.textContent = "First select the location...";
+        sportSelect.append(resetOpt);
       }
       setEventFormMessage(form, result.message || "Event created.");
       await loadEventsList();
@@ -853,8 +973,12 @@ const renderParticipantsList = (participants) => {
 
   if (!participants.length) {
     const item = document.createElement("li");
-    item.innerHTML = "<span>No participants yet</span>";
+    const noPart = document.createElement("span");
+
+    noPart.textContent = "No participants yet";
+    item.replaceChildren(noPart);
     participantsRoot.append(item);
+
   } else {
     participants.forEach((username, index) => {
       const item = document.createElement("li");

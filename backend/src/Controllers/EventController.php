@@ -35,7 +35,7 @@ final class EventController
         $user = Auth::user($this->users);
         $event = $this->events->find($id, $user !== null ? (int) $user['id'] : null);
 
-        if ($event === null) {
+        if ($event === null || ($event['status'] === 'banned' && ($user === null || $user['role'] !== 'admin'))) {
             Response::json(['message' => 'Event not found.'], 404);
         }
 

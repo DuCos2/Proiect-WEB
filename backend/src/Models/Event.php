@@ -152,7 +152,7 @@ final class Event
 
         $normalizedDate = $this->normalizeDate($payload['event_date'] ?? '');
         $normalizedEndDate = $this->normalizeDate($payload['end_date'] ?? '');
-        
+
         if ($normalizedDate === null) {
             $errors['event_date'] = 'Choose a valid start date and time.';
         } elseif (strtotime($normalizedDate) < time()) {
@@ -163,6 +163,30 @@ final class Event
             $errors['end_date'] = 'Choose a valid end date and time.';
         } elseif ($normalizedDate !== null && strtotime($normalizedEndDate) <= strtotime($normalizedDate)) {
             $errors['end_date'] = 'The end date must be after the start date.';
+        }
+
+        if (!isset($errors['event_date']) && !empty($payload['location']) && !empty($payload['event_date'])) {
+            $locationName = $payload['location'];
+            $eventDate = $this->normalizeDate($payload['event_date']);
+
+            if ($eventDate !== null) {
+                $statement = $this->pdo->prepare('
+                    SELECT COUNT(*) FROM events 
+                    INNER JOIN locations ON locations.id = events.location_id
+                    WHERE LOWER(locations.name) = LOWER(:location)
+                      AND (events.status IS NULL OR events.status = "open")
+                      AND ABS(TIMESTAMPDIFF(MINUTE, events.event_date, :event_date)) < 120
+                ');
+                $statement->execute([
+                    'location' => $locationName,
+                    'event_date' => $eventDate
+                ]);
+                $overlapCount = (int) $statement->fetchColumn();
+
+                if ($overlapCount > 0) {
+                    $errors['event_date'] = 'There is already another event scheduled at this location within this time window (2 hours).';
+                }
+            }
         }
 
         return $errors;
@@ -364,4 +388,32 @@ final class Event
         $statement = $this->pdo->prepare('DELETE FROM events WHERE id = :id');
         $statement->execute(['id' => $id]);
     }
+
+    public function allAdmin(): array
+    {
+        $statement = $this->pdo->prepare($this->baseSelect() . '
+            ORDER BY events.event_date ASC, events.created_at DESC
+        ');
+        $statement->execute();
+
+        return array_map(
+            fn (array $event): array => $this->present($event, null),
+            $statement->fetchAll()
+        );
+    }
+
+    public function toggleBan(int $id): string
+    {
+        $statement = $this->pdo->prepare('SELECT status FROM events WHERE id = :id LIMIT 1');
+        $statement->execute(['id' => $id]);
+        $status = $statement->fetchColumn();
+
+        $newStatus = ($status === 'banned') ? 'open' : 'banned';
+
+        $statement = $this->pdo->prepare('UPDATE events SET status = :status WHERE id = :id');
+        $statement->execute(['status' => $newStatus, 'id' => $id]);
+
+        return $newStatus;
+    }
+
 }

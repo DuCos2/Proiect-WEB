@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Local Greetings</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body data-requires-auth>
+<header class="site-header">
+    <a class="brand" href="index.html" aria-label="Local Greetings">
+        <img class="brand-logo" src="assets/images/app-logo.png" alt="">
+        <span>
+        <strong>Local Greetings</strong>
+        <small>sports in Iasi</small>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span class="sr-only">Menu</span>
+    </button>
+
+    <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+        <a href="index.html">Events</a>
+        <a href="search.html">Search</a>
+        <a href="login.html">Login</a>
+        <a href="register.html">Register</a>
+        <a href="profile.html" class="profile-link" aria-label="Profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2.1-7 5v1h14v-1c0-2.9-3-5-7-5Z"></path>
+            </svg>
+            Profile
+        </a>
+    </nav>
+</header>
+
+<main style="padding: 2rem 0;">
+    <div style="margin-bottom: 2rem;">
+        <p class="eyebrow">Administration</p>
+        <h1>Control Center</h1>
+        <p style="color: var(--muted); font-size: 1.1rem;">Manage users, moderate events, and maintain available locations.</p>
+    </div>
+
+    <section>
+        <div class="admin-tabs">
+            <button class="admin-tab active" id="tab-users" type="button">Users</button>
+            <button class="admin-tab" id="tab-events" type="button">Events</button>
+            <button class="admin-tab" id="tab-locations" type="button">Locations</button>
+        </div>
+
+        <div class="search-filter-box">
+            <input type="text" id="admin-search" placeholder="Search admin items..." class="btn-light" style="width: 100%; max-width: 400px; padding: 0.6rem 1rem;">
+        </div>
+
+        <!-- Users Tab Panel -->
+        <div class="admin-table-wrapper" id="panel-users">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined At</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="users-table-body">
+                <tr>
+                    <td colspan="6" style="text-align: center;">Loading users...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Events Tab Panel -->
+        <div class="admin-table-wrapper" id="panel-events" hidden>
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Sport</th>
+                    <th>Location</th>
+                    <th>Organizer</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="events-table-body">
+                <tr>
+                    <td colspan="7" style="text-align: center;">Loading events...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Locations Tab Panel -->
+        <div id="panel-locations" hidden>
+            <form class="admin-location-form" id="location-form">
+                <div class="admin-form-grid">
+                    <label>
+                        <span>Name</span>
+                        <input type="text" name="name" required>
+                    </label>
+                    <label>
+                        <span>Area</span>
+                        <input type="text" name="area" required>
+                    </label>
+                    <label>
+                        <span>Address</span>
+                        <input type="text" name="address" required>
+                    </label>
+                    <label>
+                        <span>Latitude</span>
+                        <input type="number" name="latitude" min="-90" max="90" step="0.000001">
+                    </label>
+                    <label>
+                        <span>Longitude</span>
+                        <input type="number" name="longitude" min="-180" max="180" step="0.000001">
+                    </label>
+                    <fieldset class="admin-sports-field">
+                        <legend>Sports</legend>
+                        <div class="admin-sports-options" id="admin-sports-options">
+                            <span class="admin-form-hint">Loading sports...</span>
+                        </div>
+                    </fieldset>
+                </div>
+                <p class="auth-message" data-admin-location-message></p>
+                <button type="submit" class="btn btn-secondary">Add Location</button>
+            </form>
+
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Area</th>
+                        <th>Address</th>
+                        <th>Sports</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="locations-table-body">
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Loading locations...</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>
