@@ -3,19 +3,6 @@
 Acesta este un proiect pentru disciplina Web.
 Link prezentare: https://drive.google.com/drive/folders/1GrsLW_OdaFvO8OzD-O9mB-pcvvdaQ7dd?usp=sharing
 
-## Structura proiectului
-
-- `index.html` - pagina principala cu evenimente noi
-- `search.html` - pagina de cautare cu harta si advanced search
-- `profile.html` - pagina de profil
-- `login.html` / `register.html` - pagini statice pentru autentificare
-- `assets/css/` - fisiere CSS
-- `assets/js/` - fisiere JavaScript
-- `assets/images/` - imagini
-- `assets/media/` - fisiere audio/video
-- `docs/` - documente si PDF-uri
-- `examples/` - exemple HTML pastrate separat de aplicatia principala
-
 ## Rulare locala
 
 Pentru autentificare este nevoie de PHP si MySQL prin XAMPP:
@@ -28,31 +15,25 @@ Pentru autentificare este nevoie de PHP si MySQL prin XAMPP:
 http://localhost/Proiect-WEB/
 ```
 
-Paginile HTML nu trebuie deschise direct din filesystem pentru login/register, deoarece formularele folosesc servicii PHP prin `fetch`.
 
-Autentificarea foloseste tokeni salvati in tabela `auth_tokens`, trimisi din frontend prin headerul `Authorization: Bearer ...`. Nu mai sunt folosite sesiuni PHP in `backend/storage/sessions`.
 
-Daca baza de date exista deja inainte de aceasta schimbare, ruleaza o singura data:
-
-```sql
-CREATE TABLE `login_attempts` (
-  `email` varchar(255) PRIMARY KEY,
-  `attempt_count` int NOT NULL DEFAULT 0,
-  `locked_until` datetime DEFAULT NULL,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-## Email local si SMTP
-
-Emailurile pentru verificare cont si resetare parola sunt salvate local in:
-
-```text
-backend/storage/mail.log
-```
 
 Pentru trimitere reala prin Gmail SMTP:
 
-1. Copiaza `backend/config/mail.example.php` in `backend/config/mail.local.php`.
-2. Completeaza adresa Gmail si un Google App Password.
-3. Nu urca `mail.local.php` pe GitHub; este ignorat prin `.gitignore`.
+1. Copiaza
+```php
+<?php
+
+return [
+    'host' => 'smtp.gmail.com',
+    'port' => 587,
+    'username' => '',
+    'password' => '',
+    'encryption' => 'tls',
+    'from_email' => '',
+    'from_name' => 'Local Greetings',
+];
+``` 
+
+in `backend/config/mail.local.php`.
+3. Completeaza adresa Gmail(la username si la from_email) si un Google App Password(la password).
